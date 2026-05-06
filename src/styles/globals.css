@@ -1,0 +1,93 @@
+:root {
+  --bg-primary: #0a0f1e;
+  --bg-secondary: #111827;
+  --bg-card: #131d2e;
+  --bg-hover: #1a2640;
+  --accent-gold: #f0b429;
+  --accent-teal: #0ed2c8;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --border: #1e2d45;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--accent-teal); border-radius: 2px; }
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 220px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: var(--accent-teal);
+}
+
+.badge-halal {
+  background: linear-gradient(135deg, #064e3b, #065f46);
+  color: #34d399;
+  border: 1px solid #34d399;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.badge-screen {
+  background: linear-gradient(135deg, #7c2d12, #92400e);
+  color: #fbbf24;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.up { color: var(--accent-green); }
+.down { color: var(--accent-red); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+h1, h2, h3, h4 { font-family: var(--font-display); }
+
+button {
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+input {
+  font-family: var(--font-body);
+}
