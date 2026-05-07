@@ -1,13 +1,25 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { useStockQuote } from '../hooks/useStockData';
 import { formatPrice, formatChange } from '../utils/formatters';
 import { screenStock } from '../utils/halalScreener';
 
-export default function StockCard({ ticker, name, price, change, sector, debtRatio }) {
-  const screen = screenStock(ticker, sector, debtRatio);
+export default function StockCard({ ticker, name, sector, debtRatio, onClick }) {
+  const { data, loading, refetch } = useStockQuote(ticker);
+
+  // Calculate change percentage from open to close
+  const price = data?.c || null;
+  const open = data?.o || null;
+  const change = price && open ? ((price - open) / open) * 100 : null;
   const isUp = change >= 0;
+  const screen = screenStock(ticker, sector, debtRatio);
 
   return (
-    <div className="card" style={{ cursor: 'pointer' }}>
+    <div
+      className="card"
+      style={{ cursor: 'pointer' }}
+      onClick={onClick}
+    >
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>
@@ -17,32 +29,64 @@ export default function StockCard({ ticker, name, price, change, sector, debtRat
             {name}
           </div>
         </div>
-        <span className={screen.status === 'halal' ? 'badge-halal' : 'badge-screen'}>
-          {screen.status === 'halal' ? '✓ Halal' : '⚠ Review'}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <span className={screen.status === 'halal' ? 'badge-halal' : 'badge-screen'}>
+            {screen.status === 'halal' ? '✓ Halal' : '⚠ Review'}
+          </span>
+          <button
+            onClick={e => { e.stopPropagation(); refetch(); }}
+            style={{
+              background: 'transparent', border: 'none',
+              color: 'var(--text-muted)', cursor: 'pointer', padding: 0
+            }}
+          >
+            <RefreshCw size={11} />
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 700 }}>
-            {formatPrice(price)}
-          </div>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 4, marginTop: 4,
-            color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 13
-          }}>
-            {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-            {formatChange(change)}
-          </div>
-        </div>
+      {/* Price */}
+      {loading ? (
         <div style={{
-          width: 48, height: 28,
-          background: isUp
-            ? 'linear-gradient(to right, transparent, rgba(34,197,94,0.15))'
-            : 'linear-gradient(to right, transparent, rgba(239,68,68,0.15))',
-          borderRadius: 4
+          height: 40, background: 'var(--bg-hover)',
+          borderRadius: 6, animation: 'pulse 1.5s infinite'
         }} />
-      </div>
+      ) : price ? (
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+              {formatPrice(price)}
+            </div>
+            {change !== null && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 4, marginTop: 4,
+                color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 13
+              }}>
+                {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                {formatChange(change)}
+                <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>prev day</span>
+              </div>
+            )}
+          </div>
+          {/* Mini bar */}
+          <div style={{
+            width: 48, height: 28,
+            background: isUp
+              ? 'linear-gradient(to right, transparent, rgba(34,197,94,0.15))'
+              : 'linear-gradient(to right, transparent, rgba(239,68,68,0.15))',
+            borderRadius: 4
+          }} />
+        </div>
+      ) : (
+        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Price unavailable</div>
+      )}
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
     </div>
   );
 }
