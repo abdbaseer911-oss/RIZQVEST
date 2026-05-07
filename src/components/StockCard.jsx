@@ -6,20 +6,13 @@ import { screenStock } from '../utils/halalScreener';
 export default function StockCard({ ticker, name, sector, debtRatio, onClick }) {
   const { data, loading, refetch } = useStockQuote(ticker);
 
-  // Calculate change percentage from open to close
   const price = data?.c || null;
-  const open = data?.o || null;
-  const change = price && open ? ((price - open) / open) * 100 : null;
+  const change = data?.todaysChangePerc || null;
   const isUp = change >= 0;
   const screen = screenStock(ticker, sector, debtRatio);
 
   return (
-    <div
-      className="card"
-      style={{ cursor: 'pointer' }}
-      onClick={onClick}
-    >
-      {/* Header */}
+    <div className="card" style={{ cursor: 'pointer' }} onClick={onClick}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>
@@ -45,7 +38,6 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
         </div>
       </div>
 
-      {/* Price */}
       {loading ? (
         <div style={{
           height: 40, background: 'var(--bg-hover)',
@@ -64,11 +56,10 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
               }}>
                 {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                 {formatChange(change)}
-                <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>prev day</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>today</span>
               </div>
             )}
           </div>
-          {/* Mini bar */}
           <div style={{
             width: 48, height: 28,
             background: isUp
@@ -78,7 +69,9 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
           }} />
         </div>
       ) : (
-        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Price unavailable</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+          Market closed or price unavailable
+        </div>
       )}
 
       <style>{`
