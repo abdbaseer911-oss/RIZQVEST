@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_KEY = import.meta.env.VITE_POLYGON_API_KEY;
 const BASE = 'https://api.polygon.io';
 
-// Get previous day's close price for a single stock
+// Single stock - uses snapshot for most recent price
 export function useStockQuote(ticker) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,10 +15,17 @@ export function useStockQuote(ticker) {
     try {
       setLoading(true);
       const res = await axios.get(
-        `${BASE}/v2/aggs/ticker/${ticker}/prev?adjusted=true&apiKey=${API_KEY}`
+        `${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${ticker}?apiKey=${API_KEY}`
       );
-      if (res.data.results && res.data.results.length > 0) {
-        setData(res.data.results[0]);
+      const snap = res.data.ticker;
+      if (snap) {
+        setData({
+          c: snap.day?.c || snap.prevDay?.c,
+          o: snap.day?.o || snap.prevDay?.o,
+          todaysChangePerc: snap.todaysChangePerc,
+          todaysChange: snap.todaysChange,
+          prevClose: snap.prevDay?.c,
+        });
       }
     } catch (e) {
       setError(e.message);
@@ -34,7 +41,7 @@ export function useStockQuote(ticker) {
   return { data, loading, error, refetch: fetchData };
 }
 
-// Get snapshot for multiple tickers at once
+// Multiple stocks snapshot
 export function useMarketSnapshot(tickers) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +63,6 @@ export function useMarketSnapshot(tickers) {
 
   useEffect(() => {
     fetchAll();
-    // Refresh every 60 seconds
     const interval = setInterval(fetchAll, 60000);
     return () => clearInterval(interval);
   }, [fetchAll]);
@@ -64,7 +70,7 @@ export function useMarketSnapshot(tickers) {
   return { data, loading, refetch: fetchAll };
 }
 
-// Search for stocks by name or ticker
+// Search stocks
 export function useStockSearch(query) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +99,7 @@ export function useStockSearch(query) {
   return { results, loading };
 }
 
-// Get price history for chart (last 30 days)
+// 30 day price history for charts
 export function useStockHistory(ticker) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,7 +113,6 @@ export function useStockHistory(ticker) {
         past.setDate(today.getDate() - 30);
         const from = past.toISOString().split('T')[0];
         const to = today.toISOString().split('T')[0];
-
         const res = await axios.get(
           `${BASE}/v2/aggs/ticker/${ticker}/range/1/day/${from}/${to}?adjusted=true&sort=asc&apiKey=${API_KEY}`
         );
