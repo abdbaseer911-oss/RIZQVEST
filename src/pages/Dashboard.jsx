@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import StockCard from '../components/StockCard';
-import { TrendingUp, Users, DollarSign, BarChart2 } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, BarChart2, RefreshCw } from 'lucide-react';
+import { useMarketSnapshot } from '../hooks/useStockData';
 
-const DEMO_STOCKS = [
-  { ticker: 'AAPL', name: 'Apple Inc.', price: 189.30, change: 1.24, sector: 'Technology' },
-  { ticker: 'MSFT', name: 'Microsoft Corp.', price: 415.20, change: 0.87, sector: 'Technology' },
-  { ticker: 'NVDA', name: 'NVIDIA Corp.', price: 875.40, change: 3.21, sector: 'Technology' },
-  { ticker: 'AMZN', name: 'Amazon.com', price: 178.50, change: -0.54, sector: 'Consumer' },
-  { ticker: 'TSLA', name: 'Tesla Inc.', price: 245.10, change: -1.89, sector: 'Automotive' },
-  { ticker: 'JPM', name: 'JPMorgan Chase', price: 198.40, change: 0.32, sector: 'Banks' },
+// Stocks we want to track
+const TRACKED_STOCKS = [
+  { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology', debtRatio: 0.18 },
+  { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology', debtRatio: 0.21 },
+  { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Technology', debtRatio: 0.12 },
+  { ticker: 'AMZN', name: 'Amazon.com', sector: 'Technology', debtRatio: 0.28 },
+  { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Automotive', debtRatio: 0.10 },
+  { ticker: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology', debtRatio: 0.08 },
 ];
 
 const STATS = [
@@ -19,11 +22,30 @@ const STATS = [
 ];
 
 export default function Dashboard() {
+  const tickers = TRACKED_STOCKS.map(s => s.ticker);
+  const { data: snapshots, loading, refetch } = useMarketSnapshot(tickers);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  const handleRefresh = () => {
+    refetch();
+    setLastUpdated(new Date());
+  };
+
+  // Merge live snapshot data with our stock list
+  const stocksWithPrices = TRACKED_STOCKS.map(stock => {
+    const snap = snapshots.find(s => s.ticker === stock.ticker);
+    return {
+      ...stock,
+      price: snap?.day?.c || null,
+      change: snap?.day?.todaysChangePerc || null,
+    };
+  });
+
   return (
     <div>
       <Navbar title="Dashboard" />
 
-      {/* Greeting */}
+      {/* Greeting Banner */}
       <div style={{
         background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
         border: '1px solid var(--border)',
@@ -31,8 +53,8 @@ export default function Dashboard() {
         position: 'relative', overflow: 'hidden'
       }}>
         <div style={{
-          position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
-          fontSize: 80, opacity: 0.08
+          position: 'absolute', right: 20, top: '50%',
+          transform: 'translateY(-50%)', fontSize: 80, opacity: 0.08
         }}>☽</div>
         <div style={{ fontSize: 13, color: 'var(--accent-teal)', marginBottom: 4 }}>
           بسم الله الرحمن الرحيم
@@ -41,8 +63,7 @@ export default function Dashboard() {
           Assalamu Alaikum 👋
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 500 }}>
-          Your Islamic finance terminal. All stocks are screened against AAOIFI Shariah standards.
-          Invest with confidence and conscience.
+          Your Islamic finance terminal. All stocks screened against AAOIFI Shariah standards.
         </p>
       </div>
 
@@ -65,18 +86,42 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Stocks */}
+      {/* Market Watch Header */}
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16 }}>Market Watch</h3>
-        <span style={{ fontSize: 12, color: 'var(--accent-teal)', cursor: 'pointer' }}>View All →</span>
+        <div>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16 }}>Market Watch</h3>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+            Updated: {lastUpdated.toLocaleTimeString()} · Auto-refreshes every 60s
+          </div>
+        </div>
+        <button
+          onClick={handleRefresh}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 8, padding: '6px 12px', color: 'var(--text-secondary)',
+            fontSize: 12, cursor: 'pointer'
+          }}
+        >
+          <RefreshCw size={12} />
+          Refresh
+        </button>
       </div>
+
+      {/* Stock Cards */}
       <div className="grid-3">
-        {DEMO_STOCKS.map(s => (
-          <StockCard key={s.ticker} {...s} />
+        {stocksWithPrices.map(s => (
+          <StockCard
+            key={s.ticker}
+            ticker={s.ticker}
+            name={s.name}
+            sector={s.sector}
+            debtRatio={s.debtRatio}
+          />
         ))}
       </div>
 
-      {/* Halal ETFs */}
+      {/* Halal ETFs Table */}
       <div style={{ marginTop: 28 }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, marginBottom: 14 }}>
           Shariah-Compliant ETFs
@@ -92,11 +137,12 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {[
-                ['HLAL', 'Wahed FTSE USA Shariah ETF', 'halal', '$180M', '+14.2%'],
-                ['SPUS', 'SP Funds S&P 500 Sharia', 'halal', '$720M', '+22.1%'],
-                ['SPRE', 'SP Funds Global REITs Sharia', 'halal', '$95M', '+8.7%'],
-              ].map(([ticker, name, status, aum, ret]) => (
-                <tr key={ticker} style={{ borderBottom: '1px solid var(--border)' }}
+                ['HLAL', 'Wahed FTSE USA Shariah ETF', '$180M', '+14.2%'],
+                ['SPUS', 'SP Funds S&P 500 Sharia', '$720M', '+22.1%'],
+                ['SPRE', 'SP Funds Global REITs Sharia', '$95M', '+8.7%'],
+              ].map(([ticker, name, aum, ret]) => (
+                <tr key={ticker}
+                  style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
