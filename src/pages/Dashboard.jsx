@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import StockCard from '../components/StockCard';
 import { TrendingUp, Users, DollarSign, BarChart2, RefreshCw } from 'lucide-react';
@@ -20,6 +21,7 @@ const STATS = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   return (
@@ -61,7 +63,9 @@ export default function Dashboard() {
               <Icon size={18} color={color} />
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>{value}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
+                {value}
+              </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{label}</div>
             </div>
           </div>
@@ -69,11 +73,14 @@ export default function Dashboard() {
       </div>
 
       {/* Market Watch Header */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{
+        marginBottom: 16,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      }}>
         <div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16 }}>Market Watch</h3>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-            Updated: {lastUpdated.toLocaleTimeString()} · Auto-refreshes every 60s
+            Updated: {lastUpdated.toLocaleTimeString()} · Click any stock for details
           </div>
         </div>
         <button
@@ -89,10 +96,14 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Stock Cards — uses Yahoo Finance via StockCard */}
+      {/* Stock Cards */}
       <div className="grid-3">
         {TRACKED_STOCKS.map(s => (
-          <StockCard key={s.ticker} {...s} />
+          <StockCard
+            key={s.ticker}
+            {...s}
+            onClick={() => navigate(`/stock/${s.ticker}`)}
+          />
         ))}
       </div>
 
@@ -106,7 +117,9 @@ export default function Dashboard() {
             <thead>
               <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
                 {['Ticker', 'Name', 'Status', 'AUM', '1Y Return'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500 }}>{h}</th>
+                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500 }}>
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -116,14 +129,20 @@ export default function Dashboard() {
                 ['SPUS', 'SP Funds S&P 500 Sharia', '$720M', '+22.1%'],
                 ['SPRE', 'SP Funds Global REITs Sharia', '$95M', '+8.7%'],
               ].map(([ticker, name, aum, ret]) => (
-                <tr key={ticker}
+                <tr
+                  key={ticker}
                   style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => navigate(`/stock/${ticker}`)}
                 >
-                  <td style={{ padding: '12px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
+                  <td style={{ padding: '12px', fontWeight: 700, color: 'var(--accent-teal)' }}>
+                    {ticker}
+                  </td>
                   <td style={{ padding: '12px' }}>{name}</td>
-                  <td style={{ padding: '12px' }}><span className="badge-halal">✓ Halal</span></td>
+                  <td style={{ padding: '12px' }}>
+                    <span className="badge-halal">✓ Halal</span>
+                  </td>
                   <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>{aum}</td>
                   <td style={{ padding: '12px' }} className="up">{ret}</td>
                 </tr>
