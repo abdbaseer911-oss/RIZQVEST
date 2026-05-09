@@ -1,8 +1,8 @@
 :root {
-  --bg-primary: #0a0f1e;
-  --bg-secondary: #111827;
-  --bg-card: #131d2e;
-  --bg-hover: #1a2640;
+  --bg-primary: #080d18;
+  --bg-secondary: #0d1526;
+  --bg-card: #0f1a2e;
+  --bg-hover: #162236;
   --accent-gold: #f0b429;
   --accent-teal: #0ed2c8;
   --accent-green: #22c55e;
@@ -11,21 +11,26 @@
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #475569;
-  --border: #1e2d45;
+  --border: #1a2a42;
   --font-display: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  font-size: 14px;
+}
+
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--accent-teal); border-radius: 2px; }
 
@@ -36,58 +41,98 @@ body {
 
 .main-content {
   flex: 1;
-  margin-left: 220px;
-  padding: 24px;
+  padding: 20px 24px;
   overflow-y: auto;
+  max-width: 1400px;
 }
 
+/* Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: border-color 0.2s;
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .card:hover {
-  border-color: var(--accent-teal);
+  border-color: rgba(14,210,200,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
+/* Badges */
 .badge-halal {
   background: linear-gradient(135deg, #064e3b, #065f46);
   color: #34d399;
-  border: 1px solid #34d399;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 11px;
+  border: 1px solid rgba(52,211,153,0.4);
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .badge-screen {
-  background: linear-gradient(135deg, #7c2d12, #92400e);
+  background: linear-gradient(135deg, #78350f, #92400e);
   color: #fbbf24;
-  border: 1px solid #fbbf24;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 11px;
+  border: 1px solid rgba(251,191,36,0.4);
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 10px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .up { color: var(--accent-green); }
 .down { color: var(--accent-red); }
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+/* Grids */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 
 h1, h2, h3, h4 { font-family: var(--font-display); }
 
-button {
-  cursor: pointer;
-  font-family: var(--font-body);
+button { cursor: pointer; font-family: var(--font-body); }
+input { font-family: var(--font-body); }
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-input {
-  font-family: var(--font-body);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Ticker */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Table rows */
+tr { transition: background 0.15s; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .main-content { padding: 12px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
