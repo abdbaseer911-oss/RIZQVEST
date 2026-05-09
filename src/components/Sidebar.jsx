@@ -1,12 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Search, Briefcase,
-  BookOpen, Star, Settings, TrendingUp
+  BookOpen, Globe
 } from 'lucide-react';
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/screener', icon: Search, label: 'Screener' },
+  { to: '/gulf', icon: Globe, label: 'Gulf Markets' },
   { to: '/portfolio', icon: Briefcase, label: 'Portfolio' },
   { to: '/learn', icon: BookOpen, label: 'Learn' },
 ];
@@ -42,26 +43,34 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Nav Links */}
       <nav style={{ flex: 1, padding: '0 12px' }}>
         {links.map(({ to, icon: Icon, label }) => (
-          <NavLink key={to} to={to} end={to === '/'} style={({ isActive }) => ({
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '10px 12px', borderRadius: 8, marginBottom: 4,
-            textDecoration: 'none',
-            color: isActive ? 'var(--accent-teal)' : 'var(--text-secondary)',
-            background: isActive ? 'rgba(14,210,200,0.08)' : 'transparent',
-            fontWeight: isActive ? 500 : 400,
-            fontSize: 14, transition: 'all 0.15s'
-          })}>
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '10px 12px', borderRadius: 8, marginBottom: 4,
+              textDecoration: 'none',
+              color: isActive ? 'var(--accent-teal)' : 'var(--text-secondary)',
+              background: isActive ? 'rgba(14,210,200,0.08)' : 'transparent',
+              fontWeight: isActive ? 500 : 400,
+              fontSize: 14, transition: 'all 0.15s'
+            })}
+          >
             <Icon size={16} />
             {label}
           </NavLink>
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div style={{ padding: '0 20px', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+      {/* Bottom Info */}
+      <div style={{
+        padding: '16px 20px 0',
+        borderTop: '1px solid var(--border)'
+      }}>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
           Powered by Polygon.io
         </div>
