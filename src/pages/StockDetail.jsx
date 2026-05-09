@@ -2,9 +2,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Shield } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { screenStock } from '../utils/halalScreener';
-import { formatPrice, formatChange } from '../utils/formatters';
+import { formatPrice } from '../utils/formatters';
 import Navbar from '../components/Navbar';
-import { useState, useEffect } from 'react';
+import { useStockQuote, useStockHistory } from '../hooks/useStockData';
 
 const STOCK_INFO = {
   AAPL: { name: 'Apple Inc.', sector: 'Technology', description: 'Apple designs consumer electronics, software and online services including iPhone, Mac and iPad.', debtRatio: 0.18, pe: 28.4, employees: '164,000' },
@@ -13,15 +13,12 @@ const STOCK_INFO = {
   AMZN: { name: 'Amazon.com', sector: 'Technology', description: 'Amazon operates e-commerce and cloud computing including retail and AWS cloud services.', debtRatio: 0.28, pe: 44.2, employees: '1,540,000' },
   TSLA: { name: 'Tesla Inc.', sector: 'Automotive', description: 'Tesla designs and manufactures electric vehicles, energy storage and solar products.', debtRatio: 0.10, pe: 55.0, employees: '127,855' },
   GOOGL: { name: 'Alphabet Inc.', sector: 'Technology', description: 'Alphabet is parent of Google, operating search, advertising, cloud and hardware products.', debtRatio: 0.08, pe: 25.1, employees: '182,381' },
-};
-
-const FALLBACK = {
-  AAPL: { c: 211.45, change: 1.24 },
-  MSFT: { c: 415.20, change: 0.87 },
-  NVDA: { c: 1208.88, change: 3.21 },
-  AMZN: { c: 224.19, change: 0.54 },
-  TSLA: { c: 176.75, change: -1.89 },
-  GOOGL: { c: 175.07, change: 0.62 },
+  META: { name: 'Meta Platforms', sector: 'Technology', description: 'Meta builds social technology including Facebook, Instagram, WhatsApp and the metaverse.', debtRatio: 0.09, pe: 24.3, employees: '86,482' },
+  NFLX: { name: 'Netflix Inc.', sector: 'Entertainment', description: 'Netflix is a streaming entertainment service with over 260 million paid memberships worldwide.', debtRatio: 0.31, pe: 42.1, employees: '13,000' },
+  AMD: { name: 'Advanced Micro Devices', sector: 'Technology', description: 'AMD designs high performance CPUs and GPUs for gaming, data center and embedded markets.', debtRatio: 0.11, pe: 38.5, employees: '26,000' },
+  INTC: { name: 'Intel Corp.', sector: 'Technology', description: 'Intel designs and manufactures semiconductor chips, processors and related technologies.', debtRatio: 0.29, pe: 12.4, employees: '124,800' },
+  HLAL: { name: 'Wahed FTSE USA Shariah ETF', sector: 'ETF', description: 'HLAL tracks the FTSE USA Shariah Index, providing exposure to large and mid-cap US companies that pass Shariah screening.', debtRatio: 0.0, pe: 22.1, employees: 'N/A' },
+  SPUS: { name: 'SP Funds S&P 500 Sharia ETF', sector: 'ETF', description: 'SPUS tracks a Shariah-compliant version of the S&P 500, excluding companies involved in prohibited activities.', debtRatio: 0.0, pe: 24.5, employees: 'N/A' },
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -29,9 +26,9 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div style={{
         background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 8, padding: '10px 14px', fontSize: 12
+        borderRadius: 8, padding: '8px 12px', fontSize: 12
       }}>
-        <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+        <div style={{ color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
         <div style={{ fontWeight: 700, color: 'var(--accent-teal)' }}>
           {formatPrice(payload[0].value)}
         </div>
@@ -46,124 +43,72 @@ export default function StockDetail() {
   const navigate = useNavigate();
   const info = STOCK_INFO[ticker] || {
     name: ticker, sector: 'Unknown',
-    description: 'No description available.',
+    description: 'Company information not available.',
     debtRatio: 0.2, pe: 0, employees: '—'
   };
   const screen = screenStock(ticker, info.sector, info.debtRatio);
+  const { data: quote, loading: quoteLoading } = useStockQuote(ticker);
+  const { data: history, loading: histLoading } = useStockHistory(ticker);
 
-  const [price, setPrice] = useState(null);
-  const [change, setChange] = useState(null);
-  const [isLive, setIsLive] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [histLoading, setHistLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const res = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(
-            `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`
-          )}`
-        );
-        const json = await res.json();
-        const data = JSON.parse(json.contents);
-        const meta = data.chart.result[0].meta;
-        setPrice(meta.regularMarketPrice);
-        setChange(((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100);
-        setIsLive(true);
-      } catch (e) {
-        const fb = FALLBACK[ticker];
-        if (fb) { setPrice(fb.c); setChange(fb.change); }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(
-            `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
-          )}`
-        );
-        const json = await res.json();
-        const data = JSON.parse(json.contents);
-        const result = data.chart.result[0];
-        const times = result.timestamp;
-        const closes = result.indicators.quote[0].close;
-        setHistory(times.map((t, i) => ({
-          date: new Date(t * 1000).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-          price: parseFloat(closes[i]?.toFixed(2))
-        })).filter(d => d.price));
-      } catch (e) {
-        console.error('History error:', e);
-      } finally {
-        setHistLoading(false);
-      }
-    };
-
-    fetchPrice();
-    fetchHistory();
-  }, [ticker]);
-
+  const price = quote?.c || null;
+  const change = quote?.change || null;
   const isUp = (change || 0) >= 0;
 
   return (
-    <div>
+    <div style={{ animation: 'fadeIn 0.3s ease' }}>
       <Navbar title="Stock Detail" />
 
-      {/* Back Button */}
+      {/* Back */}
       <button
         onClick={() => navigate(-1)}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
+          display: 'flex', alignItems: 'center', gap: 7,
           background: 'var(--bg-card)', border: '1px solid var(--border)',
-          borderRadius: 8, padding: '8px 14px', color: 'var(--text-secondary)',
-          fontSize: 13, cursor: 'pointer', marginBottom: 20
+          borderRadius: 7, padding: '7px 12px', color: 'var(--text-secondary)',
+          fontSize: 12, cursor: 'pointer', marginBottom: 16
         }}
       >
-        <ArrowLeft size={14} /> Back
+        <ArrowLeft size={13} /> Back to Dashboard
       </button>
 
-      {/* Header Card */}
-      <div className="card" style={{ marginBottom: 20 }}>
+      {/* Header */}
+      <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 52, height: 52, borderRadius: 12,
+              width: 48, height: 48, borderRadius: 12,
               background: 'linear-gradient(135deg, var(--accent-teal), var(--accent-purple))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: '#000'
+              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: '#000'
             }}>
               {ticker?.slice(0, 2)}
             </div>
             <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800 }}>
                 {ticker}
               </h2>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{info.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{info.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{info.sector}</div>
             </div>
           </div>
 
           <div style={{ textAlign: 'right' }}>
-            {loading ? (
-              <div style={{ width: 140, height: 48, background: 'var(--bg-hover)', borderRadius: 8 }} />
+            {quoteLoading ? (
+              <div style={{ width: 130, height: 44, background: 'var(--bg-hover)', borderRadius: 8, animation: 'pulse 1.5s infinite' }} />
             ) : (
               <>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 800 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 800 }}>
                   {formatPrice(price)}
                 </div>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  justifyContent: 'flex-end', marginTop: 4,
-                  color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 14
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  justifyContent: 'flex-end', marginTop: 3,
+                  color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 13
                 }}>
-                  {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                  {change !== null ? formatChange(change) : '—'}
-                  <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-                    {isLive ? '🟢 live' : '🔴 ref'}
+                  {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                  {change !== null ? `${change >= 0 ? '+' : ''}${change.toFixed(2)}%` : '—'}
+                  <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
+                    {quote?.isLive ? '🟢 live' : '🔴 ref'}
                   </span>
                 </div>
               </>
@@ -172,95 +117,58 @@ export default function StockDetail() {
         </div>
       </div>
 
-      {/* Price Chart */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 16 }}>
+      {/* Chart */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, marginBottom: 14 }}>
           30-Day Price Chart
         </h3>
         {histLoading ? (
-          <div style={{
-            height: 220, background: 'var(--bg-hover)',
-            borderRadius: 8, animation: 'pulse 1.5s infinite'
-          }}>
-            <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
-          </div>
+          <div style={{ height: 200, background: 'var(--bg-hover)', borderRadius: 8, animation: 'pulse 1.5s infinite' }} />
         ) : history.length > 0 ? (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={200}>
             <LineChart data={history}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
-                tickLine={false}
-                interval="preserveStartEnd"
-              />
-              <YAxis
-                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={v => `$${v}`}
-                domain={['auto', 'auto']}
-              />
+              <XAxis dataKey="date" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} tickLine={false} interval="preserveStartEnd" />
+              <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} domain={['auto', 'auto']} />
               <Tooltip content={<CustomTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke="var(--accent-teal)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, fill: 'var(--accent-teal)' }}
-              />
+              <Line type="monotone" dataKey="price" stroke="var(--accent-teal)" strokeWidth={2} dot={false} activeDot={{ r: 3, fill: 'var(--accent-teal)' }} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div style={{
-            height: 220, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            color: 'var(--text-muted)', fontSize: 13
-          }}>
+          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
             Chart data unavailable
           </div>
         )}
       </div>
 
       <div className="grid-2">
-        {/* Shariah Screening */}
+        {/* Shariah */}
         <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Shield size={16} color="var(--accent-teal)" />
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15 }}>Shariah Screening</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <Shield size={15} color="var(--accent-teal)" />
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Shariah Screening</h3>
           </div>
-
           <div style={{
-            padding: '12px 16px', borderRadius: 10, marginBottom: 16,
+            padding: '10px 14px', borderRadius: 8, marginBottom: 14,
             background: screen.status === 'halal' ? 'rgba(34,197,94,0.08)' : 'rgba(251,191,36,0.08)',
-            border: `1px solid ${screen.status === 'halal' ? 'rgba(34,197,94,0.3)' : 'rgba(251,191,36,0.3)'}`
+            border: `1px solid ${screen.status === 'halal' ? 'rgba(34,197,94,0.25)' : 'rgba(251,191,36,0.25)'}`
           }}>
-            <div style={{
-              fontSize: 15, fontWeight: 700, marginBottom: 4,
-              color: screen.status === 'halal' ? 'var(--accent-green)' : 'var(--accent-gold)'
-            }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3, color: screen.status === 'halal' ? 'var(--accent-green)' : 'var(--accent-gold)' }}>
               {screen.status === 'halal' ? '✓ Shariah Compliant' : '⚠ Needs Review'}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{screen.reason}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{screen.reason}</div>
           </div>
-
           {[
             { label: 'Business Activity', value: info.sector, pass: screen.status === 'halal' },
             { label: 'Debt Ratio', value: `${(info.debtRatio * 100).toFixed(0)}% (max 33%)`, pass: info.debtRatio <= 0.33 },
             { label: 'Interest Income', value: 'Within limits', pass: screen.status === 'halal' },
-            { label: 'Receivables Ratio', value: 'Within limits', pass: true },
+            { label: 'Receivables', value: 'Within limits', pass: true },
           ].map(({ label, value, pass }) => (
-            <div key={label} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13
-            }}>
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
               <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontSize: 11 }}>{value}</span>
-                <span style={{ color: pass ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                  {pass ? '✓' : '✗'}
-                </span>
+                <span style={{ color: pass ? 'var(--accent-green)' : 'var(--accent-red)' }}>{pass ? '✓' : '✗'}</span>
               </div>
             </div>
           ))}
@@ -268,10 +176,10 @@ export default function StockDetail() {
 
         {/* Company Info */}
         <div className="card">
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 16 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, marginBottom: 14 }}>
             About {info.name}
           </h3>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 16 }}>
             {info.description}
           </p>
           {[
@@ -280,10 +188,7 @@ export default function StockDetail() {
             { label: 'Employees', value: info.employees || '—' },
             { label: 'Debt/Assets', value: `${(info.debtRatio * 100).toFixed(0)}%` },
           ].map(({ label, value }) => (
-            <div key={label} style={{
-              display: 'flex', justifyContent: 'space-between',
-              padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13
-            }}>
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
               <span style={{ color: 'var(--text-muted)' }}>{label}</span>
               <span style={{ fontWeight: 600 }}>{value}</span>
             </div>
