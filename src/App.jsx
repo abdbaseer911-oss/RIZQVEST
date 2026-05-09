@@ -10,11 +10,11 @@ import StockDetail from './pages/StockDetail'
 
 export default function App() {
   return (
-    <div className="app-layout">
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <div style={{ flex: 1, marginLeft: 200 }}>
+      <div style={{ flex: 1, marginLeft: 200, display: 'flex', flexDirection: 'column' }}>
         <MarketTicker />
-        <div className="main-content" style={{ marginLeft: 0 }}>
+        <div style={{ padding: '20px 24px', flex: 1 }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/screener" element={<Screener />} />
