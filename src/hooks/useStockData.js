@@ -4,44 +4,40 @@ import axios from 'axios';
 const API_KEY = import.meta.env.VITE_POLYGON_API_KEY;
 const BASE = 'https://api.polygon.io';
 
-// Single stock - uses snapshot for most recent price
+// Uses Yahoo Finance proxy - free, no key needed, always works
 export function useStockQuote(ticker) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchData = useCallback(async () => {
-    if (!ticker) return;
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${ticker}?apiKey=${API_KEY}`
-      );
-      const snap = res.data.ticker;
-      if (snap) {
-        setData({
-          c: snap.day?.c || snap.prevDay?.c,
-          o: snap.day?.o || snap.prevDay?.o,
-          todaysChangePerc: snap.todaysChangePerc,
-          todaysChange: snap.todaysChange,
-          prevClose: snap.prevDay?.c,
-        });
-      }
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [ticker]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!ticker) return;
+    const fetch = async () => {
+      try {
+        const res = await axios.get(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`,
+          { headers: { 'Accept': 'application/json' } }
+        );
+        const meta = res.data.chart.result[0].meta;
+        setData({
+          c: meta.regularMarketPrice,
+          prevClose: meta.previousClose,
+          change: ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100,
+          isLive: meta.marketState === 'REGULAR',
+          marketState: meta.marketState,
+        });
+      } catch (e) {
+        console.error('Yahoo error:', e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [ticker]);
 
-  return { data, loading, error, refetch: fetchData };
+  return { data, loading };
 }
 
-// Multiple stocks snapshot
+// For the ticker banner - still uses Polygon
 export function useMarketSnapshot(tickers) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,16 +66,12 @@ export function useMarketSnapshot(tickers) {
   return { data, loading, refetch: fetchAll };
 }
 
-// Search stocks
 export function useStockSearch(query) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query || query.length < 2) {
-      setResults([]);
-      return;
-    }
+    if (!query || query.length < 2) { setResults([]); return; }
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
@@ -88,7 +80,7 @@ export function useStockSearch(query) {
         );
         setResults(res.data.results || []);
       } catch (e) {
-        console.error('Search error:', e.message);
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -99,39 +91,31 @@ export function useStockSearch(query) {
   return { results, loading };
 }
 
-// 30 day price history for charts
 export function useStockHistory(ticker) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!ticker) return;
-    const fetchHistory = async () => {
+    const fetch = async () => {
       try {
-        const today = new Date();
-        const past = new Date();
-        past.setDate(today.getDate() - 30);
-        const from = past.toISOString().split('T')[0];
-        const to = today.toISOString().split('T')[0];
         const res = await axios.get(
-          `${BASE}/v2/aggs/ticker/${ticker}/range/1/day/${from}/${to}?adjusted=true&sort=asc&apiKey=${API_KEY}`
+          `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=30d`
         );
-        const formatted = (res.data.results || []).map(d => ({
-          date: new Date(d.t).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-          price: d.c,
-          open: d.o,
-          high: d.h,
-          low: d.l,
-          volume: d.v
-        }));
-        setData(formatted);
+        const quotes = res.data.chart.result[0];
+        const times = quotes.timestamp;
+        const closes = quotes.indicators.quote[0].close;
+        setData(times.map((t, i) => ({
+          date: new Date(t * 1000).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+          price: closes[i]?.toFixed(2),
+        })));
       } catch (e) {
-        console.error('History error:', e.message);
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
-    fetchHistory();
+    fetch();
   }, [ticker]);
 
   return { data, loading };
