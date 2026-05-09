@@ -6,6 +6,7 @@ import Screener from './pages/Screener'
 import Portfolio from './pages/Portfolio'
 import Learn from './pages/Learn'
 import Gulf from './pages/Gulf'
+import StockDetail from './pages/StockDetail'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/gulf" element={<Gulf />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/learn" element={<Learn />} />
+            <Route path="/stock/:ticker" element={<StockDetail />} />
           </Routes>
         </div>
       </div>
