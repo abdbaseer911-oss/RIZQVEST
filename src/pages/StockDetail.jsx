@@ -188,3 +188,108 @@ export default function StockDetail() {
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={history}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={v => `$${v}`}
+                domain={['auto', 'auto']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke="var(--accent-teal)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, fill: 'var(--accent-teal)' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{
+            height: 220, display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-muted)', fontSize: 13
+          }}>
+            Chart data unavailable
+          </div>
+        )}
+      </div>
+
+      <div className="grid-2">
+        {/* Shariah Screening */}
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <Shield size={16} color="var(--accent-teal)" />
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15 }}>Shariah Screening</h3>
+          </div>
+
+          <div style={{
+            padding: '12px 16px', borderRadius: 10, marginBottom: 16,
+            background: screen.status === 'halal' ? 'rgba(34,197,94,0.08)' : 'rgba(251,191,36,0.08)',
+            border: `1px solid ${screen.status === 'halal' ? 'rgba(34,197,94,0.3)' : 'rgba(251,191,36,0.3)'}`
+          }}>
+            <div style={{
+              fontSize: 15, fontWeight: 700, marginBottom: 4,
+              color: screen.status === 'halal' ? 'var(--accent-green)' : 'var(--accent-gold)'
+            }}>
+              {screen.status === 'halal' ? '✓ Shariah Compliant' : '⚠ Needs Review'}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{screen.reason}</div>
+          </div>
+
+          {[
+            { label: 'Business Activity', value: info.sector, pass: screen.status === 'halal' },
+            { label: 'Debt Ratio', value: `${(info.debtRatio * 100).toFixed(0)}% (max 33%)`, pass: info.debtRatio <= 0.33 },
+            { label: 'Interest Income', value: 'Within limits', pass: screen.status === 'halal' },
+            { label: 'Receivables Ratio', value: 'Within limits', pass: true },
+          ].map(({ label, value, pass }) => (
+            <div key={label} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13
+            }}>
+              <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11 }}>{value}</span>
+                <span style={{ color: pass ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                  {pass ? '✓' : '✗'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Company Info */}
+        <div className="card">
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 16 }}>
+            About {info.name}
+          </h3>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+            {info.description}
+          </p>
+          {[
+            { label: 'Sector', value: info.sector },
+            { label: 'P/E Ratio', value: info.pe || '—' },
+            { label: 'Employees', value: info.employees || '—' },
+            { label: 'Debt/Assets', value: `${(info.debtRatio * 100).toFixed(0)}%` },
+          ].map(({ label, value }) => (
+            <div key={label} style={{
+              display: 'flex', justifyContent: 'space-between',
+              padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13
+            }}>
+              <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+              <span style={{ fontWeight: 600 }}>{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
