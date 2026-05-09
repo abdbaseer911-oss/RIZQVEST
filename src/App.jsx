@@ -12,7 +12,7 @@ export default function App() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <div style={{ flex: 1, marginLeft: 220 }}>
+      <div style={{ flex: 1, marginLeft: 200 }}>
         <MarketTicker />
         <div className="main-content" style={{ marginLeft: 0 }}>
           <Routes>
