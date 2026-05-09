@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import StockCard from '../components/StockCard';
-import { TrendingUp, Users, DollarSign, BarChart2, RefreshCw } from 'lucide-react';
+import { TrendingUp, DollarSign, BarChart2, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 const TRACKED_STOCKS = [
@@ -17,12 +17,23 @@ const STATS = [
   { label: 'Halal Stocks Tracked', value: '2,847', icon: TrendingUp, color: 'var(--accent-teal)' },
   { label: 'Global Markets', value: '42', icon: BarChart2, color: 'var(--accent-gold)' },
   { label: 'Shariah ETFs', value: '18', icon: DollarSign, color: 'var(--accent-green)' },
-  { label: 'Active Users', value: '12.4K', icon: Users, color: 'var(--accent-purple)' },
+];
+
+const QUOTES = [
+  { text: 'Do not consume one another\'s wealth unjustly.', source: 'Quran 2:188' },
+  { text: 'The truthful merchant will be with the prophets, the truthful and the martyrs.', source: 'Prophet Muhammad ﷺ' },
+  { text: 'Wealth is not about having a lot of money; it is about having a lot of options.', source: 'Chris Rock' },
+  { text: 'Risk comes from not knowing what you are doing.', source: 'Warren Buffett' },
+  { text: 'An investment in knowledge pays the best interest.', source: 'Benjamin Franklin' },
+  { text: 'The stock market is a device for transferring money from the impatient to the patient.', source: 'Warren Buffett' },
+  { text: 'Allah has permitted trade and forbidden interest.', source: 'Quran 2:275' },
+  { text: 'Do not spend wastefully; indeed the wasteful are brothers of the devils.', source: 'Quran 17:26-27' },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const quote = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
 
   return (
     <div>
@@ -32,41 +43,57 @@ export default function Dashboard() {
       <div style={{
         background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
         border: '1px solid var(--border)',
-        borderRadius: 16, padding: '24px 28px', marginBottom: 24,
+        borderRadius: 12, padding: '20px 24px', marginBottom: 20,
         position: 'relative', overflow: 'hidden'
       }}>
         <div style={{
           position: 'absolute', right: 20, top: '50%',
-          transform: 'translateY(-50%)', fontSize: 80, opacity: 0.08
+          transform: 'translateY(-50%)', fontSize: 70, opacity: 0.07
         }}>☽</div>
-        <div style={{ fontSize: 13, color: 'var(--accent-teal)', marginBottom: 4 }}>
+        <div style={{ fontSize: 12, color: 'var(--accent-teal)', marginBottom: 4 }}>
           بسم الله الرحمن الرحيم
         </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 6 }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 6 }}>
           Assalamu Alaikum 👋
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 500 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, maxWidth: 500 }}>
           Your Islamic finance terminal. All stocks screened against AAOIFI Shariah standards.
-          Invest with confidence and conscience.
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid-4" style={{ marginBottom: 24 }}>
+      {/* Finance Quote of the Day */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(240,180,41,0.06), rgba(14,210,200,0.04))',
+        border: '1px solid rgba(240,180,41,0.2)',
+        borderRadius: 10, padding: '14px 18px', marginBottom: 20,
+        display: 'flex', alignItems: 'flex-start', gap: 12
+      }}>
+        <div style={{ fontSize: 20, marginTop: 2 }}>💬</div>
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 4 }}>
+            "{quote.text}"
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--accent-gold)', fontWeight: 600 }}>
+            — {quote.source}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats — 3 cards only */}
+      <div className="grid-3" style={{ marginBottom: 20 }}>
         {STATS.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="card" style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div key={label} className="card" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <div style={{
-              width: 42, height: 42, borderRadius: 10,
+              width: 38, height: 38, borderRadius: 9,
               background: `${color}18`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0
             }}>
-              <Icon size={18} color={color} />
+              <Icon size={16} color={color} />
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
-                {value}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{label}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{value}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{label}</div>
             </div>
           </div>
         ))}
@@ -74,11 +101,11 @@ export default function Dashboard() {
 
       {/* Market Watch Header */}
       <div style={{
-        marginBottom: 16,
+        marginBottom: 14,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
       }}>
         <div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16 }}>Market Watch</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15 }}>Market Watch</h3>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
             Updated: {lastUpdated.toLocaleTimeString()} · Click any stock for details
           </div>
@@ -88,11 +115,11 @@ export default function Dashboard() {
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 8, padding: '6px 12px',
+            borderRadius: 7, padding: '5px 10px',
             color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer'
           }}
         >
-          <RefreshCw size={12} /> Refresh
+          <RefreshCw size={11} /> Refresh
         </button>
       </div>
 
@@ -107,9 +134,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Halal ETFs Table */}
-      <div style={{ marginTop: 28 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, marginBottom: 14 }}>
+      {/* Halal ETFs */}
+      <div style={{ marginTop: 24 }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 12 }}>
           Shariah-Compliant ETFs
         </h3>
         <div className="card" style={{ overflowX: 'auto' }}>
@@ -117,9 +144,7 @@ export default function Dashboard() {
             <thead>
               <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
                 {['Ticker', 'Name', 'Status', 'AUM', '1Y Return'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500 }}>
-                    {h}
-                  </th>
+                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500 }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -136,15 +161,11 @@ export default function Dashboard() {
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   onClick={() => navigate(`/stock/${ticker}`)}
                 >
-                  <td style={{ padding: '12px', fontWeight: 700, color: 'var(--accent-teal)' }}>
-                    {ticker}
-                  </td>
-                  <td style={{ padding: '12px' }}>{name}</td>
-                  <td style={{ padding: '12px' }}>
-                    <span className="badge-halal">✓ Halal</span>
-                  </td>
-                  <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>{aum}</td>
-                  <td style={{ padding: '12px' }} className="up">{ret}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
+                  <td style={{ padding: '10px 12px' }}>{name}</td>
+                  <td style={{ padding: '10px 12px' }}><span className="badge-halal">✓ Halal</span></td>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{aum}</td>
+                  <td style={{ padding: '10px 12px' }} className="up">{ret}</td>
                 </tr>
               ))}
             </tbody>
