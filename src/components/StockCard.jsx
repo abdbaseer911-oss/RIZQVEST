@@ -3,7 +3,6 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 import { formatPrice, formatChange } from '../utils/formatters';
 import { screenStock } from '../utils/halalScreener';
 
-// Fallback prices so app always shows something
 const FALLBACK = {
   AAPL: { c: 211.45, change: 1.24 },
   MSFT: { c: 415.20, change: 0.87 },
@@ -13,7 +12,7 @@ const FALLBACK = {
   GOOGL: { c: 175.07, change: 0.62 },
 };
 
-export default function StockCard({ ticker, name, sector, debtRatio }) {
+export default function StockCard({ ticker, name, sector, debtRatio, onClick }) {
   const [price, setPrice] = useState(null);
   const [change, setChange] = useState(null);
   const [isLive, setIsLive] = useState(false);
@@ -23,7 +22,6 @@ export default function StockCard({ ticker, name, sector, debtRatio }) {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        // Try multiple free sources
         const res = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(
             `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`
@@ -33,18 +31,11 @@ export default function StockCard({ ticker, name, sector, debtRatio }) {
         const data = JSON.parse(json.contents);
         const meta = data.chart.result[0].meta;
         setPrice(meta.regularMarketPrice);
-        setChange(
-          ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100
-        );
+        setChange(((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100);
         setIsLive(true);
       } catch (e) {
-        // Use fallback if API fails
         const fb = FALLBACK[ticker];
-        if (fb) {
-          setPrice(fb.c);
-          setChange(fb.change);
-          setIsLive(false);
-        }
+        if (fb) { setPrice(fb.c); setChange(fb.change); setIsLive(false); }
       } finally {
         setLoading(false);
       }
@@ -55,7 +46,23 @@ export default function StockCard({ ticker, name, sector, debtRatio }) {
   const isUp = (change || 0) >= 0;
 
   return (
-    <div className="card" style={{ cursor: 'pointer' }}>
+    <div
+      className="card"
+      onClick={onClick}
+      style={{
+        cursor: 'pointer',
+        transition: 'border-color 0.2s, transform 0.1s'
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = 'var(--accent-teal)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = 'var(--border)';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
+    >
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>
@@ -70,6 +77,7 @@ export default function StockCard({ ticker, name, sector, debtRatio }) {
         </span>
       </div>
 
+      {/* Price */}
       {loading ? (
         <div style={{
           height: 40, background: 'var(--bg-hover)',
@@ -103,6 +111,14 @@ export default function StockCard({ ticker, name, sector, debtRatio }) {
           }} />
         </div>
       )}
+
+      {/* Click hint */}
+      <div style={{
+        marginTop: 10, fontSize: 11,
+        color: 'var(--text-muted)', textAlign: 'right'
+      }}>
+        View chart →
+      </div>
     </div>
   );
 }
