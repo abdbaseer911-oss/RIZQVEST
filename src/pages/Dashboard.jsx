@@ -14,7 +14,7 @@ const TRACKED_STOCKS = [
 ];
 
 const STATS = [
-  { label: 'Halal Stocks Tracked', value: '2,847', icon: TrendingUp, color: 'var(--accent-teal)' },
+  { label: 'Halal Stocks', value: '2,847', icon: TrendingUp, color: 'var(--accent-teal)' },
   { label: 'Global Markets', value: '42', icon: BarChart2, color: 'var(--accent-gold)' },
   { label: 'Shariah ETFs', value: '18', icon: DollarSign, color: 'var(--accent-green)' },
 ];
@@ -27,144 +27,198 @@ const QUOTES = [
   { text: 'Allah has permitted trade and forbidden interest.', source: 'Quran 2:275' },
 ];
 
+const ETF_LIST = [
+  { ticker: 'HLAL', name: 'Wahed FTSE USA Shariah ETF', aum: '$180M', ret: '+14.2%' },
+  { ticker: 'SPUS', name: 'SP Funds S&P 500 Sharia', aum: '$720M', ret: '+22.1%' },
+  { ticker: 'SPRE', name: 'SP Funds Global REITs Sharia', aum: '$95M', ret: '+8.7%' },
+];
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const quote = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
 
   return (
-    <div>
+    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <Navbar title="Dashboard" />
 
-      {/* Greeting */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
-        border: '1px solid var(--border)',
-        borderRadius: 12, padding: '18px 22px', marginBottom: 14,
-        position: 'relative', overflow: 'hidden'
-      }}>
+      {/* TOP SECTION — Greeting + Quote + Stats side by side */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+
+        {/* Greeting */}
         <div style={{
-          position: 'absolute', right: 16, top: '50%',
-          transform: 'translateY(-50%)', fontSize: 60, opacity: 0.07
-        }}>☽</div>
-        <div style={{ fontSize: 11, color: 'var(--accent-teal)', marginBottom: 3 }}>
-          بسم الله الرحمن الرحيم
-        </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 4 }}>
-          Assalamu Alaikum 👋
-        </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 12, maxWidth: 480 }}>
-          Your Islamic finance terminal. All stocks screened against AAOIFI Shariah standards.
-        </p>
-      </div>
-
-      {/* Quote */}
-      <div style={{
-        background: 'rgba(240,180,41,0.05)',
-        border: '1px solid rgba(240,180,41,0.2)',
-        borderRadius: 10, padding: '10px 14px', marginBottom: 14,
-        display: 'flex', gap: 10, alignItems: 'flex-start'
-      }}>
-        <span style={{ fontSize: 16 }}>💬</span>
-        <div>
-          <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-primary)', lineHeight: 1.6, marginBottom: 2 }}>
-            "{quote.text}"
+          background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
+          border: '1px solid var(--border)',
+          borderRadius: 8, padding: '14px 18px',
+          position: 'relative', overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute', right: 12, top: '50%',
+            transform: 'translateY(-50%)', fontSize: 50, opacity: 0.07
+          }}>☽</div>
+          <div style={{ fontSize: 10, color: 'var(--accent-teal)', marginBottom: 3 }}>
+            بسم الله الرحمن الرحيم
           </div>
-          <div style={{ fontSize: 11, color: 'var(--accent-gold)', fontWeight: 600 }}>
-            — {quote.source}
-          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, marginBottom: 4 }}>
+            Assalamu Alaikum 👋
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 11, lineHeight: 1.5 }}>
+            Your Islamic finance terminal. All stocks screened against AAOIFI Shariah standards.
+          </p>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid-3" style={{ marginBottom: 14 }}>
-        {STATS.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="card" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 8,
-              background: `${color}18`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-            }}>
-              <Icon size={14} color={color} />
-            </div>
+        {/* Quote + Stats stacked */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Quote */}
+          <div style={{
+            background: 'rgba(240,180,41,0.05)',
+            border: '1px solid rgba(240,180,41,0.2)',
+            borderRadius: 8, padding: '10px 14px',
+            display: 'flex', gap: 8, alignItems: 'flex-start'
+          }}>
+            <span style={{ fontSize: 14 }}>💬</span>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>{value}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{label}</div>
+              <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 2 }}>
+                "{quote.text}"
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 600 }}>
+                — {quote.source}
+              </div>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Market Watch */}
-      <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Market Watch</h3>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
-            {lastUpdated.toLocaleTimeString()} · Click any card for chart
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {STATS.map(({ label, value, icon: Icon, color }) => (
+              <div key={label} className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px' }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: `${color}18`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                }}>
+                  <Icon size={12} color={color} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700 }}>{value}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{label}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <button
-          onClick={() => setLastUpdated(new Date())}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 6, padding: '4px 8px',
-            color: 'var(--text-secondary)', fontSize: 11, cursor: 'pointer'
-          }}
-        >
-          <RefreshCw size={10} /> Refresh
-        </button>
       </div>
 
-      {/* Stock Cards */}
-      <div className="grid-3" style={{ marginBottom: 20 }}>
-        {TRACKED_STOCKS.map(s => (
-          <StockCard
-            key={s.ticker}
-            ticker={s.ticker}
-            name={s.name}
-            sector={s.sector}
-            debtRatio={s.debtRatio}
-            onClick={() => navigate(`/stock/${s.ticker}`)}
-          />
-        ))}
-      </div>
+      {/* DIVIDER LINE */}
+      <div style={{ borderTop: '1px solid var(--border)', marginBottom: 10 }} />
 
-      {/* ETF Table */}
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, marginBottom: 10 }}>
-        Shariah-Compliant ETFs
-      </h3>
-      <div className="card" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
-              {['Ticker', 'Name', 'Status', 'AUM', '1Y Return'].map(h => (
-                <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 500 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ['HLAL', 'Wahed FTSE USA Shariah ETF', '$180M', '+14.2%'],
-              ['SPUS', 'SP Funds S&P 500 Sharia', '$720M', '+22.1%'],
-              ['SPRE', 'SP Funds Global REITs Sharia', '$95M', '+8.7%'],
-            ].map(([ticker, name, aum, ret]) => (
-              <tr
-                key={ticker}
-                style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                onClick={() => navigate(`/stock/${ticker}`)}
-              >
-                <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
-                <td style={{ padding: '9px 10px' }}>{name}</td>
-                <td style={{ padding: '9px 10px' }}><span className="badge-halal">✓ Halal</span></td>
-                <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{aum}</td>
-                <td style={{ padding: '9px 10px' }} className="up">{ret}</td>
-              </tr>
+      {/* BOTTOM SECTION — Market Watch + ETFs */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+
+        {/* Left — Stock Cards 3x2 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13 }}>Market Watch</h3>
+              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 1 }}>
+                {lastUpdated.toLocaleTimeString()} · Click for chart
+              </div>
+            </div>
+            <button
+              onClick={() => setLastUpdated(new Date())}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                borderRadius: 5, padding: '3px 7px',
+                color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer'
+              }}
+            >
+              <RefreshCw size={9} /> Refresh
+            </button>
+          </div>
+
+          {/* 3 columns x 2 rows */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {TRACKED_STOCKS.map(s => (
+              <StockCard
+                key={s.ticker}
+                ticker={s.ticker}
+                name={s.name}
+                sector={s.sector}
+                debtRatio={s.debtRatio}
+                onClick={() => navigate(`/stock/${s.ticker}`)}
+              />
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+        {/* Right — ETF Table */}
+        <div>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13, marginBottom: 8 }}>
+            Shariah-Compliant ETFs
+          </h3>
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+                  {['Ticker', 'Name', 'AUM', 'Return'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ETF_LIST.map(({ ticker, name, aum, ret }) => (
+                  <tr
+                    key={ticker}
+                    style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    onClick={() => navigate(`/stock/${ticker}`)}
+                  >
+                    <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
+                    <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{name}</td>
+                    <td style={{ padding: '9px 10px' }}>{aum}</td>
+                    <td style={{ padding: '9px 10px' }} className="up">{ret}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Halal note */}
+            <div style={{
+              padding: '10px 12px',
+              background: 'rgba(34,197,94,0.04)',
+              borderTop: '1px solid var(--border)',
+              fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.5
+            }}>
+              ✓ All ETFs above are fully Shariah screened and purified per AAOIFI standards.
+              Haram income is calculated and donated to charity quarterly.
+            </div>
+          </div>
+
+          {/* Mini Gulf preview */}
+          <div
+            onClick={() => navigate('/gulf')}
+            style={{
+              marginTop: 8,
+              background: 'linear-gradient(135deg, #0a1f0a, #0f2f1f)',
+              border: '1px solid #1a4a2a',
+              borderRadius: 8, padding: '12px 14px',
+              cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-green)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = '#1a4a2a'}
+          >
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-green)', marginBottom: 2 }}>
+                🌙 Gulf Markets
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                Saudi 🇸🇦 · UAE 🇦🇪 · Qatar 🇶🇦
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--accent-teal)' }}>Explore →</div>
+          </div>
+        </div>
       </div>
     </div>
   );
