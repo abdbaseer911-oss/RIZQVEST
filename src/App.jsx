@@ -12,9 +12,9 @@ export default function App() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <Sidebar />
-      <div style={{ flex: 1, marginLeft: 200, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ flex: 1, marginLeft: 180, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <MarketTicker />
-        <div style={{ padding: '20px 24px', flex: 1, overflowY: 'auto' }}>
+        <div style={{ padding: '16px 20px', flex: 1 }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/screener" element={<Screener />} />
