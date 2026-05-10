@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Search, Briefcase, BookOpen, Globe } from 'lucide-react';
+import { LayoutDashboard, Search, Briefcase, BookOpen, Globe, LogOut } from 'lucide-react';
+import { supabase } from '../supabase';
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -9,7 +10,11 @@ const links = [
   { to: '/learn', icon: BookOpen, label: 'Learn' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ session }) {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <aside style={{
       position: 'fixed', left: 0, top: 0, bottom: 0,
@@ -18,6 +23,7 @@ export default function Sidebar() {
       display: 'flex', flexDirection: 'column',
       padding: '16px 0', zIndex: 100
     }}>
+      {/* Logo */}
       <div style={{ padding: '0 14px 22px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{
@@ -39,6 +45,7 @@ export default function Sidebar() {
         </div>
       </div>
 
+      {/* Nav */}
       <nav style={{ flex: 1, padding: '0 8px' }}>
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
@@ -61,11 +68,29 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div style={{ padding: '12px 14px 0', borderTop: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 2 }}>
-          Powered by Polygon.io
-        </div>
-        <div style={{ fontSize: 8, color: 'var(--text-muted)' }}>
+      {/* User + Logout */}
+      <div style={{ padding: '12px 10px 0', borderTop: '1px solid var(--border)' }}>
+        {session && (
+          <div style={{
+            fontSize: 10, color: 'var(--text-muted)',
+            marginBottom: 8, padding: '0 4px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
+            {session.user.email}
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            width: '100%', padding: '7px 10px', borderRadius: 6,
+            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+            color: 'var(--accent-red)', fontSize: 11, cursor: 'pointer'
+          }}
+        >
+          <LogOut size={11} /> Sign Out
+        </button>
+        <div style={{ fontSize: 8, color: 'var(--text-muted)', marginTop: 8, padding: '0 4px' }}>
           Screened per AAOIFI Standards
         </div>
       </div>
