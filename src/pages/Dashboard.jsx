@@ -39,10 +39,10 @@ export default function Dashboard() {
   const quote = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       <Navbar title="Dashboard" />
 
-      {/* TOP SECTION — Greeting + Quote + Stats side by side */}
+      {/* TOP ROW — Greeting + Quote + Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
 
         {/* Greeting */}
@@ -67,14 +67,13 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Quote + Stats stacked */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Quote */}
+        {/* Quote + Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{
             background: 'rgba(240,180,41,0.05)',
             border: '1px solid rgba(240,180,41,0.2)',
             borderRadius: 8, padding: '10px 14px',
-            display: 'flex', gap: 8, alignItems: 'flex-start'
+            display: 'flex', gap: 8, alignItems: 'flex-start', flex: 1
           }}>
             <span style={{ fontSize: 14 }}>💬</span>
             <div>
@@ -87,19 +86,18 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Stats row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {STATS.map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px' }}>
+              <div key={label} className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 10px' }}>
                 <div style={{
-                  width: 28, height: 28, borderRadius: 6,
+                  width: 26, height: 26, borderRadius: 6,
                   background: `${color}18`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                 }}>
-                  <Icon size={12} color={color} />
+                  <Icon size={11} color={color} />
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700 }}>{value}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700 }}>{value}</div>
                   <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{label}</div>
                 </div>
               </div>
@@ -108,13 +106,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* DIVIDER LINE */}
+      {/* DIVIDER */}
       <div style={{ borderTop: '1px solid var(--border)', marginBottom: 10 }} />
 
-      {/* BOTTOM SECTION — Market Watch + ETFs */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      {/* BOTTOM ROW — Stocks + ETFs */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 10 }}>
 
-        {/* Left — Stock Cards 3x2 */}
+        {/* Left — 3x2 Stock Grid */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <div>
@@ -135,8 +133,6 @@ export default function Dashboard() {
               <RefreshCw size={9} /> Refresh
             </button>
           </div>
-
-          {/* 3 columns x 2 rows */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {TRACKED_STOCKS.map(s => (
               <StockCard
@@ -151,17 +147,21 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right — ETF Table */}
-        <div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13, marginBottom: 8 }}>
+        {/* Right — ETF Table + Gulf Preview */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13 }}>
             Shariah-Compliant ETFs
           </h3>
-          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <thead>
-                <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+                <tr style={{
+                  color: 'var(--text-muted)',
+                  borderBottom: '1px solid var(--border)',
+                  background: 'rgba(0,0,0,0.2)'
+                }}>
                   {['Ticker', 'Name', 'AUM', 'Return'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>{h}</th>
+                    <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 500 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -174,36 +174,33 @@ export default function Dashboard() {
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     onClick={() => navigate(`/stock/${ticker}`)}
                   >
-                    <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
-                    <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{name}</td>
-                    <td style={{ padding: '9px 10px' }}>{aum}</td>
-                    <td style={{ padding: '9px 10px' }} className="up">{ret}</td>
+                    <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
+                    <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: 10 }}>{name}</td>
+                    <td style={{ padding: '8px 10px' }}>{aum}</td>
+                    <td style={{ padding: '8px 10px' }} className="up">{ret}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            {/* Halal note */}
             <div style={{
-              padding: '10px 12px',
+              padding: '8px 10px',
               background: 'rgba(34,197,94,0.04)',
               borderTop: '1px solid var(--border)',
-              fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.5
+              fontSize: 9, color: 'var(--text-muted)', lineHeight: 1.5
             }}>
-              ✓ All ETFs above are fully Shariah screened and purified per AAOIFI standards.
-              Haram income is calculated and donated to charity quarterly.
+              ✓ All ETFs Shariah screened per AAOIFI standards
             </div>
           </div>
 
-          {/* Mini Gulf preview */}
+          {/* Gulf Preview Card */}
           <div
             onClick={() => navigate('/gulf')}
             style={{
-              marginTop: 8,
               background: 'linear-gradient(135deg, #0a1f0a, #0f2f1f)',
               border: '1px solid #1a4a2a',
-              borderRadius: 8, padding: '12px 14px',
-              cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              borderRadius: 8, padding: '10px 14px',
+              cursor: 'pointer',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-green)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = '#1a4a2a'}
@@ -212,7 +209,7 @@ export default function Dashboard() {
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-green)', marginBottom: 2 }}>
                 🌙 Gulf Markets
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
                 Saudi 🇸🇦 · UAE 🇦🇪 · Qatar 🇶🇦
               </div>
             </div>
