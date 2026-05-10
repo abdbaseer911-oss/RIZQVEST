@@ -18,9 +18,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html {
-  font-size: 14px;
-}
+html { font-size: 13px; }
 
 body {
   background: var(--bg-primary);
@@ -41,33 +39,30 @@ body {
 
 .main-content {
   flex: 1;
-  padding: 20px 24px;
+  padding: 16px 20px;
   overflow-y: auto;
-  max-width: 1400px;
 }
 
-/* Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 12px 14px;
   transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .card:hover {
-  border-color: rgba(14,210,200,0.3);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  border-color: rgba(14,210,200,0.25);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
 
-/* Badges */
 .badge-halal {
   background: linear-gradient(135deg, #064e3b, #065f46);
   color: #34d399;
-  border: 1px solid rgba(52,211,153,0.4);
-  border-radius: 5px;
-  padding: 2px 7px;
-  font-size: 10px;
+  border: 1px solid rgba(52,211,153,0.35);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -76,10 +71,10 @@ body {
 .badge-screen {
   background: linear-gradient(135deg, #78350f, #92400e);
   color: #fbbf24;
-  border: 1px solid rgba(251,191,36,0.4);
-  border-radius: 5px;
-  padding: 2px 7px;
-  font-size: 10px;
+  border: 1px solid rgba(251,191,36,0.35);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 9px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -87,52 +82,38 @@ body {
 .up { color: var(--accent-green); }
 .down { color: var(--accent-red); }
 
-/* Grids */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
 h1, h2, h3, h4 { font-family: var(--font-display); }
 
 button { cursor: pointer; font-family: var(--font-body); }
 input { font-family: var(--font-body); }
 
-/* Animations */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-/* Ticker */
 @keyframes ticker {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-/* Table rows */
 tr { transition: background 0.15s; }
 
-/* Responsive */
 @media (max-width: 1100px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 700px) {
-  .main-content { padding: 12px; }
+  .main-content { padding: 10px; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
