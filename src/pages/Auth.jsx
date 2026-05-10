@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+
+const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 3 + 1,
+  duration: Math.random() * 10 + 8,
+  delay: Math.random() * 5,
+}));
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -7,8 +16,14 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 100);
+  }, []);
 
   const handleAuth = async () => {
+    if (!email || !password) { setMessage('Please fill in all fields'); return; }
     setLoading(true);
     setMessage('');
     try {
@@ -18,7 +33,7 @@ export default function Auth() {
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setMessage('Check your email to confirm your account!');
+        setMessage('Account created! You can now sign in.');
       }
     } catch (e) {
       setMessage(e.message);
@@ -29,37 +44,78 @@ export default function Auth() {
 
   return (
     <div style={{
-      minHeight: '100vh', background: 'var(--bg-primary)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
+      minHeight: '100vh',
+      background: 'radial-gradient(ellipse at 20% 50%, #0f2a1a 0%, #070b14 40%, #0a0f2e 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      position: 'relative', overflow: 'hidden'
     }}>
+      {/* Animated particles */}
+      {PARTICLES.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute',
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: p.id % 3 === 0 ? 'var(--accent-teal)' : p.id % 3 === 1 ? 'var(--accent-gold)' : 'var(--accent-green)',
+          opacity: 0.3,
+          animation: `float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+          pointerEvents: 'none'
+        }} />
+      ))}
+
+      {/* Big background moon */}
       <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: '32px 28px', width: 360
+        position: 'absolute', right: '10%', top: '10%',
+        fontSize: 200, opacity: 0.03,
+        animation: 'float 12s ease-in-out infinite',
+        pointerEvents: 'none'
+      }}>☽</div>
+
+      {/* Card */}
+      <div style={{
+        background: 'rgba(15,26,46,0.9)',
+        border: '1px solid rgba(14,210,200,0.2)',
+        borderRadius: 16, padding: '36px 32px', width: 380,
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(14,210,200,0.05)',
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.97)',
+        transition: 'all 0.5s ease',
+        position: 'relative', zIndex: 1
       }}>
+        {/* Top accent line */}
+        <div style={{
+          position: 'absolute', top: 0, left: '10%', right: '10%', height: 1,
+          background: 'linear-gradient(90deg, transparent, var(--accent-teal), var(--accent-gold), transparent)',
+          borderRadius: 1
+        }} />
+
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
-            width: 48, height: 48, borderRadius: 12,
+            width: 56, height: 56, borderRadius: 14,
             background: 'linear-gradient(135deg, var(--accent-gold), #e67e00)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 24, margin: '0 auto 10px'
+            fontSize: 28, margin: '0 auto 12px',
+            boxShadow: '0 8px 24px rgba(240,180,41,0.3)',
+            animation: 'glow 3s ease-in-out infinite'
           }}>☽</div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 800, marginBottom: 3 }}>
             RizqVest
           </h1>
-          <p style={{ fontSize: 11, color: 'var(--accent-gold)', letterSpacing: 1, marginTop: 2 }}>
+          <p style={{ fontSize: 10, color: 'var(--accent-teal)', letterSpacing: 2 }}>
             ISLAMIC FINANCE TERMINAL
           </p>
         </div>
 
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, marginBottom: 20, textAlign: 'center' }}>
-          {isLogin ? 'Welcome Back' : 'Create Account'}
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>
+          {isLogin ? '👋 Welcome back' : '✨ Create your account'}
         </h2>
 
         {/* Email */}
         <div style={{ marginBottom: 12 }}>
-          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-            Email
+          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>
+            Email address
           </label>
           <input
             type="email"
@@ -67,17 +123,20 @@ export default function Auth() {
             onChange={e => setEmail(e.target.value)}
             placeholder="you@example.com"
             style={{
-              width: '100%', background: 'var(--bg-hover)',
-              border: '1px solid var(--border)', borderRadius: 7,
-              padding: '9px 12px', color: 'var(--text-primary)',
-              fontSize: 13, outline: 'none', boxSizing: 'border-box'
+              width: '100%', background: 'rgba(22,34,54,0.8)',
+              border: '1px solid var(--border)', borderRadius: 8,
+              padding: '10px 14px', color: 'var(--text-primary)',
+              fontSize: 13, outline: 'none', boxSizing: 'border-box',
+              transition: 'border-color 0.2s'
             }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent-teal)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
         </div>
 
         {/* Password */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>
             Password
           </label>
           <input
@@ -87,22 +146,25 @@ export default function Auth() {
             placeholder="••••••••"
             onKeyDown={e => e.key === 'Enter' && handleAuth()}
             style={{
-              width: '100%', background: 'var(--bg-hover)',
-              border: '1px solid var(--border)', borderRadius: 7,
-              padding: '9px 12px', color: 'var(--text-primary)',
-              fontSize: 13, outline: 'none', boxSizing: 'border-box'
+              width: '100%', background: 'rgba(22,34,54,0.8)',
+              border: '1px solid var(--border)', borderRadius: 8,
+              padding: '10px 14px', color: 'var(--text-primary)',
+              fontSize: 13, outline: 'none', boxSizing: 'border-box',
+              transition: 'border-color 0.2s'
             }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent-teal)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
         </div>
 
         {/* Message */}
         {message && (
           <div style={{
-            padding: '8px 12px', borderRadius: 6, marginBottom: 12,
-            background: message.includes('Check') ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-            border: `1px solid ${message.includes('Check') ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
-            color: message.includes('Check') ? 'var(--accent-green)' : 'var(--accent-red)',
-            fontSize: 12
+            padding: '8px 12px', borderRadius: 7, marginBottom: 12,
+            background: message.includes('created') ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+            border: `1px solid ${message.includes('created') ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            color: message.includes('created') ? 'var(--accent-green)' : 'var(--accent-red)',
+            fontSize: 12, animation: 'slideDown 0.3s ease'
           }}>
             {message}
           </div>
@@ -113,14 +175,25 @@ export default function Auth() {
           onClick={handleAuth}
           disabled={loading}
           style={{
-            width: '100%', padding: '10px',
-            background: 'linear-gradient(135deg, var(--accent-teal), #0ab5ac)',
-            border: 'none', borderRadius: 7, color: '#000',
-            fontWeight: 700, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1, marginBottom: 14
+            width: '100%', padding: '11px',
+            background: loading
+              ? 'var(--bg-hover)'
+              : 'linear-gradient(135deg, var(--accent-teal), #0ab5ac)',
+            border: 'none', borderRadius: 8, color: loading ? 'var(--text-muted)' : '#000',
+            fontWeight: 700, fontSize: 13,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            marginBottom: 16, transition: 'all 0.2s',
+            boxShadow: loading ? 'none' : '0 4px 16px rgba(14,210,200,0.3)'
           }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
+          {loading ? (
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <span style={{ width: 14, height: 14, border: '2px solid var(--text-muted)', borderTopColor: 'var(--accent-teal)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
+              Please wait...
+            </span>
+          ) : isLogin ? 'Sign In →' : 'Create Account →'}
         </button>
 
         {/* Toggle */}
@@ -134,9 +207,13 @@ export default function Auth() {
           </span>
         </p>
 
-        <p style={{ textAlign: 'center', fontSize: 10, color: 'var(--text-muted)', marginTop: 16 }}>
-          بسم الله الرحمن الرحيم
-        </p>
+        {/* Bottom */}
+        <div style={{ textAlign: 'center', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            بسم الله الرحمن الرحيم<br/>
+            <span style={{ fontSize: 9 }}>Screened per AAOIFI Shariah Standards</span>
+          </p>
+        </div>
       </div>
     </div>
   );
