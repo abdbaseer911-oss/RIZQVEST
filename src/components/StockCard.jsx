@@ -21,14 +21,20 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
   useEffect(() => {
     const key = import.meta.env.VITE_ALPHA_KEY;
     if (!key || !ticker) return;
-    fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${key}`)
+    fetch(
+      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${key}`
+    )
       .then(r => r.json())
       .then(json => {
         const q = json['Global Quote'];
         if (q && q['05. price']) {
           const p = parseFloat(q['05. price']);
-          const c = parseFloat(q['10. change percent']?.replace('%', '') || '0');
-          if (p > 0) { setPrice(p); setChange(c); setIsLive(true); }
+          const c = parseFloat((q['10. change percent'] || '0').replace('%', ''));
+          if (p > 0) {
+            setPrice(p);
+            setChange(isNaN(c) ? 0 : c);
+            setIsLive(true);
+          }
         }
       })
       .catch(() => {});
@@ -40,8 +46,10 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
       style={{
         background: 'var(--bg-card)',
         border: '1px solid var(--border)',
-        borderRadius: 10, padding: 16,
-        cursor: 'pointer', transition: 'all 0.15s',
+        borderRadius: 10,
+        padding: 16,
+        cursor: 'pointer',
+        transition: 'all 0.15s',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = 'rgba(14,210,200,0.4)';
@@ -68,19 +76,23 @@ export default function StockCard({ ticker, name, sector, debtRatio, onClick }) 
         </span>
       </div>
 
-      <div style={{ fontSize: 20, fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 4 }}>
-        ${price ? price.toFixed(2) : '—'}
+      <div style={{
+        fontSize: 20,
+        fontFamily: 'var(--font-display)',
+        fontWeight: 700,
+        marginBottom: 6
+      }}>
+        ${price ? Number(price).toFixed(2) : '—'}
       </div>
 
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
-          color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 12
+          color: isUp ? 'var(--accent-green)' : 'var(--accent-red)',
+          fontSize: 12
         }}>
           {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          {change !== null ? `${change >= 0 ? '+' : ''}${change.toFixed(2)}%` : '—'}
+          {change !== null ? `${change >= 0 ? '+' : ''}${Number(change).toFixed(2)}%` : '—'}
           <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
             {isLive ? '🟢' : '🔴'}
           </span>
