@@ -13,62 +13,59 @@ export default function Sidebar() {
   return (
     <aside style={{
       position: 'fixed', left: 0, top: 0, bottom: 0,
-      width: 200, background: '#080d18',
+      width: 180, background: '#060b14',
       borderRight: '1px solid var(--border)',
       display: 'flex', flexDirection: 'column',
-      padding: '20px 0', zIndex: 100
+      padding: '16px 0', zIndex: 100
     }}>
-      {/* Logo */}
-      <div style={{ padding: '0 16px 28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ padding: '0 14px 22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 8,
+            width: 28, height: 28, borderRadius: 7,
             background: 'linear-gradient(135deg, var(--accent-gold), #e67e00)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16
+            fontSize: 14, flexShrink: 0
           }}>☽</div>
           <div>
             <div style={{
               fontFamily: 'var(--font-display)',
-              fontWeight: 800, fontSize: 16,
+              fontWeight: 800, fontSize: 14,
               color: 'var(--text-primary)'
             }}>RizqVest</div>
-            <div style={{ fontSize: 9, color: 'var(--accent-gold)', letterSpacing: 1 }}>
+            <div style={{ fontSize: 8, color: 'var(--accent-gold)', letterSpacing: 1 }}>
               ISLAMIC FINANCE
             </div>
           </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '0 10px' }}>
+      <nav style={{ flex: 1, padding: '0 8px' }}>
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             style={({ isActive }) => ({
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '9px 10px', borderRadius: 7, marginBottom: 3,
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 10px', borderRadius: 6, marginBottom: 2,
               textDecoration: 'none',
               color: isActive ? 'var(--accent-teal)' : 'var(--text-secondary)',
               background: isActive ? 'rgba(14,210,200,0.08)' : 'transparent',
               fontWeight: isActive ? 500 : 400,
-              fontSize: 13, transition: 'all 0.15s'
+              fontSize: 12, transition: 'all 0.15s'
             })}
           >
-            <Icon size={15} />
+            <Icon size={13} />
             {label}
           </NavLink>
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div style={{ padding: '14px 16px 0', borderTop: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>
+      <div style={{ padding: '12px 14px 0', borderTop: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 2 }}>
           Powered by Polygon.io
         </div>
-        <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: 8, color: 'var(--text-muted)' }}>
           Screened per AAOIFI Standards
         </div>
       </div>
