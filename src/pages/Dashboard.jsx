@@ -20,12 +20,11 @@ const STATS = [
 ];
 
 const QUOTES = [
-  { text: 'Do not consume one another\'s wealth unjustly.', source: 'Quran 2:188' },
-  { text: 'The truthful merchant will be with the prophets, the truthful and the martyrs.', source: 'Prophet Muhammad ﷺ' },
+  { text: "Do not consume one another's wealth unjustly.", source: 'Quran 2:188' },
+  { text: 'The truthful merchant will be with the prophets and the martyrs.', source: 'Prophet Muhammad ﷺ' },
   { text: 'Risk comes from not knowing what you are doing.', source: 'Warren Buffett' },
   { text: 'An investment in knowledge pays the best interest.', source: 'Benjamin Franklin' },
   { text: 'Allah has permitted trade and forbidden interest.', source: 'Quran 2:275' },
-  { text: 'The stock market is a device for transferring money from the impatient to the patient.', source: 'Warren Buffett' },
 ];
 
 export default function Dashboard() {
@@ -37,38 +36,38 @@ export default function Dashboard() {
     <div>
       <Navbar title="Dashboard" />
 
-      {/* Greeting Banner */}
+      {/* Greeting */}
       <div style={{
         background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
         border: '1px solid var(--border)',
-        borderRadius: 12, padding: '20px 24px', marginBottom: 16,
+        borderRadius: 12, padding: '18px 22px', marginBottom: 14,
         position: 'relative', overflow: 'hidden'
       }}>
         <div style={{
-          position: 'absolute', right: 20, top: '50%',
-          transform: 'translateY(-50%)', fontSize: 70, opacity: 0.07
+          position: 'absolute', right: 16, top: '50%',
+          transform: 'translateY(-50%)', fontSize: 60, opacity: 0.07
         }}>☽</div>
-        <div style={{ fontSize: 11, color: 'var(--accent-teal)', marginBottom: 4 }}>
+        <div style={{ fontSize: 11, color: 'var(--accent-teal)', marginBottom: 3 }}>
           بسم الله الرحمن الرحيم
         </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 6 }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 4 }}>
           Assalamu Alaikum 👋
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, maxWidth: 500 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 12, maxWidth: 480 }}>
           Your Islamic finance terminal. All stocks screened against AAOIFI Shariah standards.
         </p>
       </div>
 
-      {/* Quote of the Day */}
+      {/* Quote */}
       <div style={{
         background: 'rgba(240,180,41,0.05)',
         border: '1px solid rgba(240,180,41,0.2)',
-        borderRadius: 10, padding: '12px 16px', marginBottom: 16,
-        display: 'flex', alignItems: 'flex-start', gap: 10
+        borderRadius: 10, padding: '10px 14px', marginBottom: 14,
+        display: 'flex', gap: 10, alignItems: 'flex-start'
       }}>
-        <div style={{ fontSize: 18 }}>💬</div>
+        <span style={{ fontSize: 16 }}>💬</span>
         <div>
-          <div style={{ fontSize: 13, color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 3 }}>
+          <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-primary)', lineHeight: 1.6, marginBottom: 2 }}>
             "{quote.text}"
           </div>
           <div style={{ fontSize: 11, color: 'var(--accent-gold)', fontWeight: 600 }}>
@@ -78,47 +77,47 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid-3" style={{ marginBottom: 16 }}>
+      <div className="grid-3" style={{ marginBottom: 14 }}>
         {STATS.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="card" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div key={label} className="card" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div style={{
-              width: 36, height: 36, borderRadius: 8,
+              width: 34, height: 34, borderRadius: 8,
               background: `${color}18`,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
             }}>
-              <Icon size={15} color={color} />
+              <Icon size={14} color={color} />
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{value}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{label}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>{value}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Market Watch */}
-      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15 }}>Market Watch</h3>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-            {lastUpdated.toLocaleTimeString()} · Click any stock for chart
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Market Watch</h3>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
+            {lastUpdated.toLocaleTimeString()} · Click any card for chart
           </div>
         </div>
         <button
           onClick={() => setLastUpdated(new Date())}
           style={{
-            display: 'flex', alignItems: 'center', gap: 5,
+            display: 'flex', alignItems: 'center', gap: 4,
             background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 7, padding: '5px 10px',
-            color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer'
+            borderRadius: 6, padding: '4px 8px',
+            color: 'var(--text-secondary)', fontSize: 11, cursor: 'pointer'
           }}
         >
-          <RefreshCw size={11} /> Refresh
+          <RefreshCw size={10} /> Refresh
         </button>
       </div>
 
-      {/* Stock Cards Grid */}
-      <div className="grid-3" style={{ marginBottom: 24 }}>
+      {/* Stock Cards */}
+      <div className="grid-3" style={{ marginBottom: 20 }}>
         {TRACKED_STOCKS.map(s => (
           <StockCard
             key={s.ticker}
@@ -132,15 +131,15 @@ export default function Dashboard() {
       </div>
 
       {/* ETF Table */}
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginBottom: 12 }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, marginBottom: 10 }}>
         Shariah-Compliant ETFs
       </h3>
       <div className="card" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
             <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
               {['Ticker', 'Name', 'Status', 'AUM', '1Y Return'].map(h => (
-                <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500 }}>{h}</th>
+                <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 500 }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -157,11 +156,11 @@ export default function Dashboard() {
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 onClick={() => navigate(`/stock/${ticker}`)}
               >
-                <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
-                <td style={{ padding: '10px 12px' }}>{name}</td>
-                <td style={{ padding: '10px 12px' }}><span className="badge-halal">✓ Halal</span></td>
-                <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{aum}</td>
-                <td style={{ padding: '10px 12px' }} className="up">{ret}</td>
+                <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--accent-teal)' }}>{ticker}</td>
+                <td style={{ padding: '9px 10px' }}>{name}</td>
+                <td style={{ padding: '9px 10px' }}><span className="badge-halal">✓ Halal</span></td>
+                <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{aum}</td>
+                <td style={{ padding: '9px 10px' }} className="up">{ret}</td>
               </tr>
             ))}
           </tbody>
