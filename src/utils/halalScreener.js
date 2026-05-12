@@ -1,43 +1,120 @@
-// Simplified Halal screening based on AAOIFI / Dow Jones Islamic Index rules
-// In a real app, you'd pull this from a dedicated halal data provider
+// AAOIFI Shariah Screening Standards
+// 3 criteria: Business activity, Debt ratio (<33%), Interest income (<5%)
 
-const HARAM_SECTORS = [
-  'Banks', 'Insurance', 'Financial Services',
-  'Beverages', 'Tobacco', 'Defense',
-  'Gambling', 'Hotels & Entertainment',
+const HARAM_TICKERS = [
+  // Alcohol
+  'BUD', 'TAP', 'STZ', 'SAM', 'BREW',
+  // Tobacco
+  'MO', 'PM', 'BTI', 'LO', 'VGR',
+  // Gambling
+  'MGM', 'LVS', 'WYNN', 'CZR', 'DKNG', 'PENN',
+  // Weapons/Defense (controversial)
+  'LMT', 'RTX', 'NOC', 'GD', 'BA',
+  // Conventional Banks (interest-based)
+  'JPM', 'BAC', 'C', 'WFC', 'GS', 'MS', 'USB', 'PNC',
+  // Insurance (conventional)
+  'MET', 'PRU', 'AFL', 'AIG', 'TRV',
+  // Adult entertainment
+  'PLAYBOY',
+  // Pork
+  'HRL', 'TSN', 'WH',
 ];
 
-const EXCLUDED_TICKERS = [
-  'BUD', 'TAP', 'STZ', // Alcohol
-  'MO', 'PM', 'BTI',   // Tobacco
-  'MGM', 'LVS', 'WYNN',// Gambling
-  'JPM', 'BAC', 'C',   // Conventional banks (high interest)
+const QUESTIONABLE_TICKERS = [
+  // Media with some haram content
+  'DIS', 'NFLX', 'PARA', 'WBD',
+  // Hotels (alcohol served)
+  'MAR', 'HLT', 'H', 'IHG',
+  // Mixed business
+  'AMZN', 'BABA', 'EBAY',
+  // High debt conventional finance adjacent
+  'V', 'MA', 'AXP',
+];
+
+const HARAM_SECTORS = [
+  'Banks', 'Insurance', 'Gambling',
+  'Tobacco', 'Alcohol', 'Defense',
+  'Adult Entertainment',
+];
+
+const QUESTIONABLE_SECTORS = [
+  'Entertainment', 'Hotels', 'Restaurants',
 ];
 
 export function screenStock(ticker, sector, debtRatio) {
-  if (EXCLUDED_TICKERS.includes(ticker)) {
-    return { status: 'haram', reason: 'Excluded sector/product' };
+  // Hard haram
+  if (HARAM_TICKERS.includes(ticker)) {
+    return {
+      status: 'haram',
+      reason: 'Core business involves prohibited activities',
+      details: {
+        businessActivity: false,
+        debtRatio: true,
+        interestIncome: false,
+      }
+    };
   }
-  if (HARAM_SECTORS.some(s => sector?.includes(s))) {
-    return { status: 'questionable', reason: 'Sector review needed' };
+
+  // Haram sector
+  if (HARAM_SECTORS.some(s => sector?.toLowerCase().includes(s.toLowerCase()))) {
+    return {
+      status: 'haram',
+      reason: 'Sector involves prohibited activities',
+      details: {
+        businessActivity: false,
+        debtRatio: debtRatio <= 0.33,
+        interestIncome: false,
+      }
+    };
   }
-  if (debtRatio && debtRatio > 0.33) {
-    return { status: 'questionable', reason: 'High debt ratio (>33%)' };
+
+  // Questionable tickers
+  if (QUESTIONABLE_TICKERS.includes(ticker)) {
+    return {
+      status: 'questionable',
+      reason: 'Mixed business activities require scholar review',
+      details: {
+        businessActivity: null,
+        debtRatio: debtRatio <= 0.33,
+        interestIncome: null,
+      }
+    };
   }
-  return { status: 'halal', reason: 'Passes basic screening' };
+
+  // Questionable sector
+  if (QUESTIONABLE_SECTORS.some(s => sector?.toLowerCase().includes(s.toLowerCase()))) {
+    return {
+      status: 'questionable',
+      reason: 'Sector may involve some non-compliant activities',
+      details: {
+        businessActivity: null,
+        debtRatio: debtRatio <= 0.33,
+        interestIncome: null,
+      }
+    };
+  }
+
+  // Debt ratio check
+  if (debtRatio > 0.33) {
+    return {
+      status: 'questionable',
+      reason: 'Debt ratio exceeds 33% AAOIFI threshold',
+      details: {
+        businessActivity: true,
+        debtRatio: false,
+        interestIncome: true,
+      }
+    };
+  }
+
+  // Passes all checks
+  return {
+    status: 'halal',
+    reason: 'Passes AAOIFI Shariah screening criteria',
+    details: {
+      businessActivity: true,
+      debtRatio: true,
+      interestIncome: true,
+    }
+  };
 }
-
-export const GULF_WATCHLIST = [
-  { ticker: 'ARAMCO.SR', name: 'Saudi Aramco', exchange: 'Tadawul' },
-  { ticker: 'EMAAR.AE', name: 'Emaar Properties', exchange: 'DFM' },
-  { ticker: 'FAB.AE', name: 'First Abu Dhabi Bank', exchange: 'ADX' },
-  { ticker: 'ADNOC.AE', name: 'ADNOC Distribution', exchange: 'ADX' },
-  { ticker: 'ALMARAI.SR', name: 'Almarai', exchange: 'Tadawul' },
-];
-
-export const HALAL_ETF_LIST = [
-  { ticker: 'HLAL', name: 'Wahed FTSE USA Shariah ETF' },
-  { ticker: 'SPUS', name: 'SP Funds S&P 500 Sharia' },
-  { ticker: 'SPRE', name: 'SP Funds Global REITs Sharia' },
-  { ticker: 'UMMA', name: 'Saturna Al-Kawthar Global Fund' },
-];
