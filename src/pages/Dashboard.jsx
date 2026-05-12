@@ -1,22 +1,33 @@
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import StockCard from '../components/StockCard';
-import { TrendingUp, DollarSign, BarChart2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 const TRACKED_STOCKS = [
   { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology', debtRatio: 0.18 },
   { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology', debtRatio: 0.21 },
   { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Technology', debtRatio: 0.12 },
+  { ticker: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology', debtRatio: 0.08 },
   { ticker: 'AMZN', name: 'Amazon.com', sector: 'Consumer', debtRatio: 0.28 },
   { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Automotive', debtRatio: 0.10 },
-  { ticker: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology', debtRatio: 0.08 },
+  { ticker: 'META', name: 'Meta Platforms', sector: 'Technology', debtRatio: 0.09 },
+  { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'Technology', debtRatio: 0.11 },
+  { ticker: 'NFLX', name: 'Netflix Inc.', sector: 'Entertainment', debtRatio: 0.31 },
+  { ticker: 'PYPL', name: 'PayPal Holdings', sector: 'Fintech', debtRatio: 0.24 },
+  { ticker: 'HLAL', name: 'Wahed Shariah ETF', sector: 'ETF', debtRatio: 0.0 },
+  { ticker: 'TSM', name: 'Taiwan Semiconductor', sector: 'Technology', debtRatio: 0.14 },
 ];
 
 const ETF_LIST = [
-  { ticker: 'HLAL', name: 'Wahed FTSE USA Shariah ETF', aum: '$180M', ret: '+14.2%' },
-  { ticker: 'SPUS', name: 'SP Funds S&P 500 Sharia', aum: '$720M', ret: '+22.1%' },
-  { ticker: 'SPRE', name: 'SP Funds Global REITs Sharia', aum: '$95M', ret: '+8.7%' },
+  { ticker: 'HLAL', name: 'Wahed FTSE USA Shariah ETF', aum: '$180M', ret: '+14.2%', region: '🇺🇸' },
+  { ticker: 'SPUS', name: 'SP Funds S&P 500 Sharia', aum: '$720M', ret: '+22.1%', region: '🇺🇸' },
+  { ticker: 'SPRE', name: 'SP Funds Global REITs Sharia', aum: '$95M', ret: '+8.7%', region: '🌍' },
+  { ticker: 'UMMA', name: 'Saturna Al-Kawthar Global', aum: '$45M', ret: '+11.3%', region: '🌍' },
+  { ticker: 'SPSK', name: 'SP Funds Dow Jones Global Sukuk', aum: '$38M', ret: '+4.2%', region: '🌍' },
+  { ticker: 'AMANX', name: 'Amana Income Fund', aum: '$1.2B', ret: '+9.8%', region: '🇺🇸' },
+  { ticker: 'AMAGX', name: 'Amana Growth Fund', aum: '$2.1B', ret: '+18.4%', region: '🇺🇸' },
+  { ticker: 'ADJEX', name: 'Azzad Ethical Mid Cap Fund', aum: '$220M', ret: '+13.7%', region: '🇺🇸' },
 ];
 
 const QUOTES = [
@@ -27,10 +38,9 @@ const QUOTES = [
   { text: 'Allah has permitted trade and forbidden interest.', source: 'Quran 2:275' },
 ];
 
-function AnimatedCounter({ target, suffix = '', prefix = '' }) {
+function AnimatedCounter({ target }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
-
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
@@ -49,18 +59,13 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [target]);
-
-  return (
-    <span ref={ref}>
-      {prefix}{count.toLocaleString()}{suffix}
-    </span>
-  );
+  return <span ref={ref}>{count.toLocaleString()}</span>;
 }
 
 const STATS = [
-  { label: 'Halal Stocks', target: 2847, suffix: '', icon: TrendingUp, color: 'var(--accent-teal)' },
-  { label: 'Global Markets', target: 42, suffix: '', icon: BarChart2, color: 'var(--accent-gold)' },
-  { label: 'Shariah ETFs', target: 18, suffix: '', icon: DollarSign, color: 'var(--accent-green)' },
+  { label: 'Halal Stocks', target: 2847, color: 'var(--accent-teal)', icon: '✓' },
+  { label: 'Global Markets', target: 42, color: 'var(--accent-gold)', icon: '🌍' },
+  { label: 'Shariah ETFs', target: 18, color: 'var(--accent-green)', icon: '📊' },
 ];
 
 export default function Dashboard() {
@@ -74,21 +79,19 @@ export default function Dashboard() {
 
       {/* TOP ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-
         {/* Greeting */}
         <div style={{
           background: 'linear-gradient(135deg, #0f2027, #1a3a4a)',
           border: '1px solid rgba(14,210,200,0.15)',
           borderRadius: 10, padding: '16px 20px',
           position: 'relative', overflow: 'hidden',
-          animation: 'fadeInLeft 0.4s ease'
         }}>
           <div style={{
             position: 'absolute', right: 10, top: '50%',
             transform: 'translateY(-50%)', fontSize: 55, opacity: 0.06,
             animation: 'float 8s ease-in-out infinite'
           }}>☽</div>
-          <div style={{ fontSize: 10, color: 'var(--accent-teal)', marginBottom: 4, letterSpacing: 0.5 }}>
+          <div style={{ fontSize: 10, color: 'var(--accent-teal)', marginBottom: 4 }}>
             بسم الله الرحمن الرحيم
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 17, marginBottom: 5 }}>
@@ -106,7 +109,6 @@ export default function Dashboard() {
             border: '1px solid rgba(240,180,41,0.2)',
             borderRadius: 10, padding: '10px 14px',
             display: 'flex', gap: 8, flex: 1,
-            animation: 'fadeInUp 0.4s ease 0.1s both'
           }}>
             <span style={{ fontSize: 16, marginTop: 1 }}>💬</span>
             <div>
@@ -119,29 +121,18 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
-            animation: 'fadeInUp 0.4s ease 0.2s both'
-          }}>
-            {STATS.map(({ label, target, suffix, icon: Icon, color }) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {STATS.map(({ label, target, color, icon }) => (
               <div key={label} className="card" style={{
-                display: 'flex', gap: 8, alignItems: 'center', padding: '8px 10px',
+                padding: '10px 12px', textAlign: 'center',
                 background: `linear-gradient(135deg, var(--bg-card), ${color}08)`,
                 border: `1px solid ${color}20`
               }}>
-                <div style={{
-                  width: 26, height: 26, borderRadius: 6,
-                  background: `${color}18`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  <Icon size={12} color={color} />
+                <div style={{ fontSize: 18, marginBottom: 3 }}>{icon}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color }}>
+                  <AnimatedCounter target={target} />
                 </div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color }}>
-                    <AnimatedCounter target={target} suffix={suffix} />
-                  </div>
-                  <div style={{ fontSize: 9, color: 'var(--text-secondary)' }}>{label}</div>
-                </div>
+                <div style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2 }}>{label}</div>
               </div>
             ))}
           </div>
@@ -149,10 +140,7 @@ export default function Dashboard() {
       </div>
 
       {/* DIVIDER */}
-      <div style={{
-        borderTop: '1px solid var(--border)', marginBottom: 10,
-        position: 'relative'
-      }}>
+      <div style={{ borderTop: '1px solid var(--border)', marginBottom: 10, position: 'relative' }}>
         <div style={{
           position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)',
           width: 60, height: 1,
@@ -163,13 +151,13 @@ export default function Dashboard() {
       {/* BOTTOM ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 10 }}>
 
-        {/* Left — Stocks */}
+        {/* Left — 12 Stocks in 4x3 grid */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13 }}>Market Watch</h3>
               <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 1 }}>
-                {lastUpdated.toLocaleTimeString()} · Click for chart
+                {lastUpdated.toLocaleTimeString()} · Click any card for chart
               </div>
             </div>
             <button
@@ -188,7 +176,12 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} className="stagger">
+          {/* 4 columns x 3 rows = 12 stocks */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 8
+          }} className="stagger">
             {TRACKED_STOCKS.map(s => (
               <StockCard
                 key={s.ticker}
@@ -202,7 +195,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right — ETFs + Gulf */}
+        {/* Right — 8 ETFs + Gulf */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13 }}>
             Shariah-Compliant ETFs
@@ -211,39 +204,41 @@ export default function Dashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <thead>
                 <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                  {['Ticker', 'Name', 'AUM', '1Y'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 500 }}>{h}</th>
+                  {['', 'Ticker', 'AUM', '1Y'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 500 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {ETF_LIST.map(({ ticker, name, aum, ret }) => (
+                {ETF_LIST.map(({ ticker, name, aum, ret, region }) => (
                   <tr
                     key={ticker}
                     style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     onClick={() => navigate(`/stock/${ticker}`)}
+                    title={name}
                   >
-                    <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--accent-green)' }}>{ticker}</td>
-                    <td style={{ padding: '8px 10px', color: 'var(--text-muted)', fontSize: 10 }}>{name}</td>
-                    <td style={{ padding: '8px 10px' }}>{aum}</td>
-                    <td style={{ padding: '8px 10px' }} className="up">{ret}</td>
+                    <td style={{ padding: '6px 8px', fontSize: 12 }}>{region}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--accent-green)', fontSize: 11 }}>{ticker}</td>
+                    <td style={{ padding: '6px 8px', color: 'var(--text-muted)', fontSize: 10 }}>{aum}</td>
+                    <td style={{ padding: '6px 8px', color: 'var(--accent-green)', fontWeight: 600 }}>{ret}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div style={{ padding: '7px 10px', background: 'rgba(34,197,94,0.04)', borderTop: '1px solid var(--border)', fontSize: 9, color: 'var(--text-muted)' }}>
-              ✓ All ETFs screened per AAOIFI standards
+            <div style={{ padding: '6px 8px', background: 'rgba(34,197,94,0.04)', borderTop: '1px solid var(--border)', fontSize: 9, color: 'var(--text-muted)' }}>
+              ✓ All ETFs screened per AAOIFI standards · Hover for full name
             </div>
           </div>
 
+          {/* Gulf card */}
           <div
             onClick={() => navigate('/gulf')}
             style={{
               background: 'linear-gradient(135deg, #071a07, #0f2f1a)',
               border: '1px solid rgba(34,197,94,0.2)',
-              borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
+              borderRadius: 10, padding: '10px 14px', cursor: 'pointer',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               transition: 'all 0.2s'
             }}
@@ -259,7 +254,7 @@ export default function Dashboard() {
             }}
           >
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-green)', marginBottom: 3 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-green)', marginBottom: 2 }}>
                 🌙 Gulf Markets
               </div>
               <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
