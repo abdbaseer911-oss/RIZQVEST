@@ -2,21 +2,29 @@ import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { screenStock } from '../utils/halalScreener';
 
-const REFERENCE = {
-  AAPL: { c: 211.45, change: 1.24 },
-  MSFT: { c: 415.20, change: 0.87 },
-  NVDA: { c: 1208.88, change: 3.21 },
-  AMZN: { c: 224.19, change: 0.54 },
-  TSLA: { c: 176.75, change: -1.89 },
-  GOOGL: { c: 175.07, change: 0.62 },
-};
+
 
 const SECTOR_CONFIG = {
   Technology:       { color: '#3b82f6', icon: '💻' },
   Automotive:       { color: '#f97316', icon: '🚗' },
   Healthcare:       { color: '#22c55e', icon: '🏥' },
   Energy:           { color: '#f0b429', icon: '⚡' },
-  Consumer:         { color: '#ec4899', icon: '🛍️' },
+  Consumer:         { color: '#ec4899',const REFERENCE = {
+  AAPL: { c: 207.15, change: 0.82 },
+  MSFT: { c: 415.20, change: 0.87 },
+  NVDA: { c: 121.44, change: 2.15 },
+  AMZN: { c: 203.19, change: 0.94 },
+  TSLA: { c: 248.05, change: -1.23 },
+  GOOGL: { c: 165.27, change: 0.42 },
+  META: { c: 584.45, change: 1.85 },
+  NFLX: { c: 1145.30, change: 0.72 },
+  AMD: { c: 108.90, change: 1.10 },
+  INTC: { c: 21.30, change: -0.54 },
+  HLAL: { c: 34.80, change: 0.73 },
+  SPUS: { c: 58.20, change: 0.55 },
+  TSM: { c: 172.40, change: 1.23 },
+  PYPL: { c: 68.45, change: 0.23 },
+}; icon: '🛍️' },
   Industrials:      { color: '#8b5cf6', icon: '🏭' },
   Telecom:          { color: '#0ed2c8', icon: '📡' },
   ETF:              { color: '#22c55e', icon: '📊' },
