@@ -2,14 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { screenStock } from '../utils/halalScreener';
 
-
-
-const SECTOR_CONFIG = {
-  Technology:       { color: '#3b82f6', icon: '💻' },
-  Automotive:       { color: '#f97316', icon: '🚗' },
-  Healthcare:       { color: '#22c55e', icon: '🏥' },
-  Energy:           { color: '#f0b429', icon: '⚡' },
-  Consumer:         { color: '#ec4899',const REFERENCE = {
+const REFERENCE = {
   AAPL: { c: 207.15, change: 0.82 },
   MSFT: { c: 415.20, change: 0.87 },
   NVDA: { c: 121.44, change: 2.15 },
@@ -24,15 +17,22 @@ const SECTOR_CONFIG = {
   SPUS: { c: 58.20, change: 0.55 },
   TSM: { c: 172.40, change: 1.23 },
   PYPL: { c: 68.45, change: 0.23 },
-}; icon: '🛍️' },
-  Industrials:      { color: '#8b5cf6', icon: '🏭' },
-  Telecom:          { color: '#0ed2c8', icon: '📡' },
-  ETF:              { color: '#22c55e', icon: '📊' },
-  'Islamic Banking':{ color: '#34d399', icon: '🌙' },
-  'Real Estate':    { color: '#f97316', icon: '🏢' },
-  Entertainment:    { color: '#a855f7', icon: '🎬' },
-  Fintech:          { color: '#06b6d4', icon: '💳' },
-  Defense:          { color: '#94a3b8', icon: '🛡️' },
+};
+
+const SECTOR_CONFIG = {
+  Technology: { color: '#3b82f6', icon: '💻' },
+  Automotive: { color: '#f97316', icon: '🚗' },
+  Healthcare: { color: '#22c55e', icon: '🏥' },
+  Energy: { color: '#f0b429', icon: '⚡' },
+  Consumer: { color: '#ec4899', icon: '🛍️' },
+  Industrials: { color: '#8b5cf6', icon: '🏭' },
+  Telecom: { color: '#0ed2c8', icon: '📡' },
+  ETF: { color: '#22c55e', icon: '📊' },
+  'Islamic Banking': { color: '#34d399', icon: '🌙' },
+  'Real Estate': { color: '#f97316', icon: '🏢' },
+  Entertainment: { color: '#a855f7', icon: '🎬' },
+  Fintech: { color: '#06b6d4', icon: '💳' },
+  Defense: { color: '#94a3b8', icon: '🛡️' },
 };
 
 function AnimatedPrice({ value }) {
@@ -62,137 +62,143 @@ function AnimatedPrice({ value }) {
 }
 
 export default function StockCard({ ticker, name, sector, debtRatio, onClick }) {
-  const [price, setPrice] = useState(REFERENCE[ticker]?.c || null);
-  const [change, setChange] = useState(REFERENCE[ticker]?.change || null);
+  const [price, setPrice] = useState(REFERENCE[ticker] ? REFERENCE[ticker].c : null);
+  const [change, setChange] = useState(REFERENCE[ticker] ? REFERENCE[ticker].change : null);
   const [isLive, setIsLive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [flash, setFlash] = useState(false);
+
   const screen = screenStock(ticker, sector, debtRatio);
   const isUp = (change || 0) >= 0;
   const cfg = SECTOR_CONFIG[sector] || { color: '#0ed2c8', icon: '📈' };
 
   useEffect(() => {
     const key = import.meta.env.VITE_ALPHA_KEY;
-    if (!key || !ticker) { setLoading(false); return; }
-    fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${key}`)
-      .then(r => r.json())
-      .then(json => {
-        const q = json['Global Quote'];
+    if (!key || !ticker) {
+      setLoading(false);
+      return;
+    }
+    fetch(
+      'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' +
+      ticker + '&apikey=' + key
+    )
+      .then(function(r) { return r.json(); })
+      .then(function(json) {
+        var q = json['Global Quote'];
         if (q && q['05. price']) {
-          const p = parseFloat(q['05. price']);
-          const c = parseFloat((q['10. change percent'] || '0').replace('%', ''));
+          var p = parseFloat(q['05. price']);
+          var rawChange = q['10. change percent'] || '0';
+          var c = parseFloat(rawChange.replace('%', ''));
           if (p > 0) {
-            setPrice(p); setChange(isNaN(c) ? 0 : c); setIsLive(true);
-            setFlash(true); setTimeout(() => setFlash(false), 1500);
+            setPrice(p);
+            setChange(isNaN(c) ? 0 : c);
+            setIsLive(true);
+            setFlash(true);
+            setTimeout(function() { setFlash(false); }, 1500);
           }
         }
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(function() {})
+      .finally(function() { setLoading(false); });
   }, [ticker]);
 
   return (
     <div
       onClick={onClick}
       style={{
-        background: `linear-gradient(135deg, #0f1a2e 50%, ${cfg.color}10)`,
-        border: `1px solid ${cfg.color}30`,
-        borderRadius: 10, padding: '13px 14px',
-        cursor: 'pointer', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #0f1a2e 50%, ' + cfg.color + '10)',
+        border: '1px solid ' + cfg.color + '30',
+        borderRadius: 10,
+        padding: '11px 12px',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
         transition: 'all 0.2s ease',
       }}
-      onMouseEnter={e => {
+      onMouseEnter={function(e) {
         e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.borderColor = `${cfg.color}70`;
-        e.currentTarget.style.boxShadow = `0 8px 28px ${cfg.color}20`;
+        e.currentTarget.style.borderColor = cfg.color + '70';
+        e.currentTarget.style.boxShadow = '0 8px 28px ' + cfg.color + '20';
       }}
-      onMouseLeave={e => {
+      onMouseLeave={function(e) {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = `${cfg.color}30`;
+        e.currentTarget.style.borderColor = cfg.color + '30';
         e.currentTarget.style.boxShadow = 'none';
       }}
     >
       {/* Top color bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-        background: `linear-gradient(90deg, ${cfg.color}, transparent)`,
+        background: 'linear-gradient(90deg, ' + cfg.color + ', transparent)',
       }} />
 
       {/* Glow orb */}
       <div style={{
         position: 'absolute', top: -30, right: -30,
-        width: 90, height: 90, borderRadius: '50%',
-        background: `radial-gradient(circle, ${cfg.color}18, transparent 70%)`,
-        pointerEvents: 'none'
+        width: 80, height: 80, borderRadius: '50%',
+        background: 'radial-gradient(circle, ' + cfg.color + '18, transparent 70%)',
+        pointerEvents: 'none',
       }} />
 
-      {/* Flash overlay */}
-      {flash && (
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 10,
-          background: `${cfg.color}08`,
-          animation: 'pulse 0.5s ease',
-          pointerEvents: 'none'
-        }} />
-      )}
-
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-            background: `${cfg.color}15`,
-            border: `1px solid ${cfg.color}30`,
+            width: 24, height: 24, borderRadius: 6, flexShrink: 0,
+            background: cfg.color + '15',
+            border: '1px solid ' + cfg.color + '30',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13
+            fontSize: 11,
           }}>
             {cfg.icon}
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 12 }}>
               {ticker}
             </div>
-            <div style={{ fontSize: 9, color: cfg.color, marginTop: 1, fontWeight: 600 }}>
+            <div style={{ fontSize: 8, color: cfg.color, fontWeight: 600 }}>
               {sector}
             </div>
           </div>
         </div>
-        <span className={screen.status === 'halal' ? 'badge-halal' : 'badge-screen'}>
-          {screen.status === 'halal' ? '✓ Halal' : '⚠'}
+        <span className={screen.status === 'halal' ? 'badge-halal' : screen.status === 'haram' ? 'badge-haram' : 'badge-screen'}>
+          {screen.status === 'halal' ? '✓' : screen.status === 'haram' ? '✗' : '⚠'}
         </span>
       </div>
 
-      {/* Company name */}
-      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 8 }}>{name}</div>
+      {/* Name */}
+      <div style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 7 }}>{name}</div>
 
       {/* Price */}
       {loading ? (
-        <div style={{ height: 32, borderRadius: 6 }} className="shimmer" />
+        <div style={{ height: 30, borderRadius: 5 }} className="shimmer" />
       ) : (
-        <>
+        <div>
           <div style={{
-            fontSize: 19, fontFamily: 'var(--font-display)', fontWeight: 700,
-            marginBottom: 5, color: flash ? cfg.color : 'var(--text-primary)',
-            transition: 'color 0.5s'
+            fontSize: 17, fontFamily: 'var(--font-display)', fontWeight: 700,
+            marginBottom: 4,
+            color: flash ? cfg.color : 'var(--text-primary)',
+            transition: 'color 0.5s',
           }}>
             <AnimatedPrice value={price} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{
               display: 'flex', alignItems: 'center', gap: 3,
-              color: isUp ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 11
+              color: isUp ? 'var(--accent-green)' : 'var(--accent-red)',
+              fontSize: 10,
             }}>
-              {isUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-              {change !== null ? `${change >= 0 ? '+' : ''}${Number(change).toFixed(2)}%` : '—'}
+              {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {change !== null ? (change >= 0 ? '+' : '') + Number(change).toFixed(2) + '%' : '—'}
               <span style={{
                 width: 5, height: 5, borderRadius: '50%', marginLeft: 2,
                 background: isLive ? 'var(--accent-green)' : '#475569',
-                animation: isLive ? 'pulse 2s infinite' : 'none'
+                animation: isLive ? 'pulse 2s infinite' : 'none',
               }} />
             </div>
-            <span style={{ fontSize: 9, color: cfg.color, opacity: 0.7 }}>View →</span>
+            <span style={{ fontSize: 8, color: cfg.color, opacity: 0.7 }}>View →</span>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
