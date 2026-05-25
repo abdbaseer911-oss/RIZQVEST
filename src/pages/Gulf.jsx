@@ -17,7 +17,7 @@ const UAE_STOCKS = [
   { ticker: 'FAB.AE', name: 'First Abu Dhabi Bank', sector: 'Banking', price: 14.20, change: 0.42, halal: false, mcap: '$45B' },
   { ticker: 'ADNOC.AE', name: 'ADNOC Distribution', sector: 'Energy', price: 4.35, change: -0.23, halal: true, mcap: '$18B' },
   { ticker: 'DIB.AE', name: 'Dubai Islamic Bank', sector: 'Islamic Banking', price: 6.80, change: 0.88, halal: true, mcap: '$8B' },
-  { ticker: 'ETISALAT.AE', name: 'e& Etisalat', sector: 'Telecom', price: 22.50, change: 0.15, halal: true, mcap: '$40B' },
+  { ticker: 'ETISALAT.AE', name: 'e and Etisalat', sector: 'Telecom', price: 22.50, change: 0.15, halal: true, mcap: '$40B' },
   { ticker: 'DU.AE', name: 'du EITC', sector: 'Telecom', price: 7.15, change: -0.42, halal: true, mcap: '$6B' },
 ];
 
@@ -35,13 +35,14 @@ const KW_STOCKS = [
 ];
 
 const MARKETS = [
-  { id: 'Saudi Arabia', flag: 'SA', exchange: 'Tadawul', index: 'TASI', indexValue: '11,842', indexChange: 0.54, currency: 'SAR', color: '#22c55e', link: 'https://www.saudiexchange.sa', stocks: SA_STOCKS },
-  { id: 'UAE', flag: 'UAE', exchange: 'DFM/ADX', index: 'DFMGI', indexValue: '4,284', indexChange: 1.34, currency: 'AED', color: '#0ed2c8', link: 'https://www.dfm.ae', stocks: UAE_STOCKS },
-  { id: 'Qatar', flag: 'QA', exchange: 'QSE', index: 'QE Index', indexValue: '9,842', indexChange: -0.18, currency: 'QAR', color: '#8b5cf6', link: 'https://www.qe.com.qa', stocks: QA_STOCKS },
-  { id: 'Kuwait', flag: 'KW', exchange: 'Boursa', index: 'BKP', indexValue: '7,124', indexChange: 0.22, currency: 'KWD', color: '#f0b429', link: 'https://www.boursakuwait.com.kw', stocks: KW_STOCKS },
+  { id: 'Saudi Arabia', exchange: 'Tadawul', index: 'TASI', indexValue: '11,842', indexChange: 0.54, currency: 'SAR', color: '#22c55e', stocks: SA_STOCKS },
+  { id: 'UAE', exchange: 'DFM/ADX', index: 'DFMGI', indexValue: '4,284', indexChange: 1.34, currency: 'AED', color: '#0ed2c8', stocks: UAE_STOCKS },
+  { id: 'Qatar', exchange: 'QSE', index: 'QE Index', indexValue: '9,842', indexChange: -0.18, currency: 'QAR', color: '#8b5cf6', stocks: QA_STOCKS },
+  { id: 'Kuwait', exchange: 'Boursa', index: 'BKP', indexValue: '7,124', indexChange: 0.22, currency: 'KWD', color: '#f0b429', stocks: KW_STOCKS },
 ];
 
-const FLAGS = { 'Saudi Arabia': '🇸🇦', UAE: '🇦🇪', Qatar: '🇶🇦', Kuwait: '🇰🇼' };
+const FLAGS = { 'Saudi Arabia': 'SA', UAE: 'UAE', Qatar: 'QA', Kuwait: 'KW' };
+const FLAG_EMOJI = { 'Saudi Arabia': '🇸🇦', UAE: '🇦🇪', Qatar: '🇶🇦', Kuwait: '🇰🇼' };
 
 const SECTOR_COLORS = {
   Energy: '#f0b429',
@@ -56,20 +57,37 @@ const SECTOR_COLORS = {
 };
 
 export default function Gulf() {
-  const navigate = useNavigate();
-  const [activeId, setActiveId] = useState('Saudi Arabia');
+  var navigate = useNavigate();
+  var activeState = useState('Saudi Arabia');
+  var activeId = activeState[0];
+  var setActiveId = activeState[1];
 
-  var market = MARKETS.find(function(m) { return m.id === activeId; });
-  var totalStocks = MARKETS.reduce(function(a, m) { return a + m.stocks.length; }, 0);
-  var halalCount = MARKETS.reduce(function(a, m) {
-    return a + m.stocks.filter(function(s) { return s.halal; }).length;
-  }, 0);
+  var market = null;
+  for (var i = 0; i < MARKETS.length; i++) {
+    if (MARKETS[i].id === activeId) {
+      market = MARKETS[i];
+      break;
+    }
+  }
+
+  var totalStocks = 0;
+  var halalCount = 0;
+  for (var j = 0; j < MARKETS.length; j++) {
+    totalStocks += MARKETS[j].stocks.length;
+    for (var k = 0; k < MARKETS[j].stocks.length; k++) {
+      if (MARKETS[j].stocks[k].halal) halalCount++;
+    }
+  }
+
+  var halalInMarket = 0;
+  for (var m = 0; m < market.stocks.length; m++) {
+    if (market.stocks[m].halal) halalInMarket++;
+  }
 
   return (
     <div style={{ width: '100%', animation: 'fadeInUp 0.4s ease' }}>
       <Navbar title="Gulf Markets" />
 
-      {/* Hero */}
       <div style={{
         background: 'linear-gradient(135deg, #071a07 0%, #0a1f14 50%, #0d1a2e 100%)',
         border: '1px solid rgba(34,197,94,0.2)',
@@ -80,9 +98,8 @@ export default function Gulf() {
           position: 'absolute', right: 20, top: '50%',
           transform: 'translateY(-50%)', fontSize: 80, opacity: 0.05,
           pointerEvents: 'none',
-        }}>
-          {String.fromCodePoint(0x262A)}
-        </div>
+        }}>☽</div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -96,34 +113,41 @@ export default function Gulf() {
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: 11, maxWidth: 420, lineHeight: 1.6 }}>
               Track Shariah-screened stocks across Saudi Arabia, UAE, Qatar and Kuwait.
-              Gulf markets are among the most Islamic-finance-friendly in the world.
             </p>
           </div>
+
           <div style={{ display: 'flex', gap: 8 }}>
-            {[
-              { label: 'GCC Stocks', value: totalStocks, color: 'var(--accent-teal)' },
-              { label: 'Halal', value: halalCount, color: 'var(--accent-green)' },
-              { label: 'Exchanges', value: 4, color: 'var(--accent-gold)' },
-            ].map(function(item) {
-              return (
-                <div key={item.label} style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 8, padding: '10px 14px',
-                  textAlign: 'center', minWidth: 70,
-                }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: item.color }}>
-                    {item.value}
-                  </div>
-                  <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>{item.label}</div>
-                </div>
-              );
-            })}
+            <div style={{
+              background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8, padding: '10px 14px', textAlign: 'center', minWidth: 70,
+            }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--accent-teal)' }}>
+                {totalStocks}
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>GCC Stocks</div>
+            </div>
+            <div style={{
+              background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8, padding: '10px 14px', textAlign: 'center', minWidth: 70,
+            }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--accent-green)' }}>
+                {halalCount}
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>Halal</div>
+            </div>
+            <div style={{
+              background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8, padding: '10px 14px', textAlign: 'center', minWidth: 70,
+            }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--accent-gold)' }}>
+                4
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>Exchanges</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Market tabs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
         {MARKETS.map(function(m) {
           var isActive = activeId === m.id;
@@ -149,7 +173,7 @@ export default function Gulf() {
                 }} />
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontSize: 18 }}>{FLAGS[m.id]}</span>
+                <span style={{ fontSize: 18 }}>{FLAG_EMOJI[m.id]}</span>
                 <span style={{
                   fontSize: 8, padding: '1px 5px', borderRadius: 3,
                   background: m.color + '15', color: m.color,
@@ -175,22 +199,16 @@ export default function Gulf() {
         })}
       </div>
 
-      {/* Stocks + Info */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
 
-        {/* Stock table */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 13 }}>
-              {FLAGS[market.id]} {market.id} Stocks
+              {FLAG_EMOJI[market.id]} {market.id} Stocks
             </h3>
-            
-              href={market.link}
-              target="_blank"
-              style={{ fontSize: 10, color: market.color, textDecoration: 'none' }}
-            >
-              Live on {market.exchange} ↗
-            </a>
+            <span style={{ fontSize: 10, color: market.color }}>
+              {market.exchange} Exchange
+            </span>
           </div>
 
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -201,13 +219,11 @@ export default function Gulf() {
                   borderBottom: '1px solid var(--border)',
                   color: 'var(--text-muted)',
                 }}>
-                  {['Company', 'Price', 'Chg%', 'MCap', 'Shariah'].map(function(h) {
-                    return (
-                      <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>
-                        {h}
-                      </th>
-                    );
-                  })}
+                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>Company</th>
+                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>Price</th>
+                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>Chg%</th>
+                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>MCap</th>
+                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 500 }}>Shariah</th>
                 </tr>
               </thead>
               <tbody>
@@ -249,7 +265,7 @@ export default function Gulf() {
                       </td>
                       <td style={{ padding: '9px 10px' }}>
                         <span className={s.halal ? 'badge-halal' : 'badge-screen'}>
-                          {s.halal ? '✓ Halal' : '⚠ Review'}
+                          {s.halal ? 'Halal' : 'Review'}
                         </span>
                       </td>
                     </tr>
@@ -260,39 +276,40 @@ export default function Gulf() {
           </div>
         </div>
 
-        {/* Info panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-
           <div className="card" style={{
             background: 'linear-gradient(135deg, var(--bg-card), ' + market.color + '08)',
             border: '1px solid ' + market.color + '20',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 24 }}>{FLAGS[market.id]}</span>
+              <span style={{ fontSize: 24 }}>{FLAG_EMOJI[market.id]}</span>
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700 }}>
                   {market.id} Market
                 </div>
-                <div style={{ fontSize: 10, color: market.color }}>{market.exchange} Exchange</div>
+                <div style={{ fontSize: 10, color: market.color }}>{market.exchange}</div>
               </div>
             </div>
-            {[
-              { label: 'Currency', value: market.currency },
-              { label: 'Stocks', value: market.stocks.length + ' shown' },
-              { label: 'Halal', value: market.stocks.filter(function(s) { return s.halal; }).length + ' / ' + market.stocks.length },
-              { label: 'Index', value: market.index + ' ' + market.indexValue },
-              { label: 'Data', value: 'Reference prices' },
-            ].map(function(item) {
-              return (
-                <div key={item.label} style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 11,
-                }}>
-                  <span style={{ color: 'var(--text-muted)' }}>{item.label}</span>
-                  <span style={{ fontWeight: 600 }}>{item.value}</span>
-                </div>
-              );
-            })}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Currency</span>
+              <span style={{ fontWeight: 600 }}>{market.currency}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Stocks</span>
+              <span style={{ fontWeight: 600 }}>{market.stocks.length} shown</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Halal</span>
+              <span style={{ fontWeight: 600 }}>{halalInMarket} / {market.stocks.length}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Index</span>
+              <span style={{ fontWeight: 600 }}>{market.index} {market.indexValue}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 11 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Data</span>
+              <span style={{ fontWeight: 600 }}>Reference prices</span>
+            </div>
           </div>
 
           <div style={{
@@ -319,29 +336,42 @@ export default function Gulf() {
               Live Exchange Links
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[
-                { name: 'Tadawul', url: 'https://www.saudiexchange.sa' },
-                { name: 'DFM', url: 'https://www.dfm.ae' },
-                { name: 'QSE', url: 'https://www.qe.com.qa' },
-                { name: 'Boursa KW', url: 'https://www.boursakuwait.com.kw' },
-              ].map(function(ex) {
-                return (
-                  
-                    key={ex.name}
-                    href={ex.url}
-                    target="_blank"
-                    style={{
-                      fontSize: 9, padding: '3px 7px', borderRadius: 4,
-                      background: 'rgba(212,168,67,0.08)',
-                      color: 'var(--accent-gold)',
-                      border: '1px solid rgba(212,168,67,0.2)',
-                      textDecoration: 'none', fontWeight: 600,
-                    }}
-                  >
-                    {ex.name} ↗
-                  </a>
-                );
-              })}
+              <span
+                onClick={function() { window.open('https://www.saudiexchange.sa', '_blank'); }}
+                style={{
+                  fontSize: 9, padding: '3px 7px', borderRadius: 4,
+                  background: 'rgba(212,168,67,0.08)', color: 'var(--accent-gold)',
+                  border: '1px solid rgba(212,168,67,0.2)',
+                  cursor: 'pointer', fontWeight: 600,
+                }}
+              >Tadawul</span>
+              <span
+                onClick={function() { window.open('https://www.dfm.ae', '_blank'); }}
+                style={{
+                  fontSize: 9, padding: '3px 7px', borderRadius: 4,
+                  background: 'rgba(212,168,67,0.08)', color: 'var(--accent-gold)',
+                  border: '1px solid rgba(212,168,67,0.2)',
+                  cursor: 'pointer', fontWeight: 600,
+                }}
+              >DFM</span>
+              <span
+                onClick={function() { window.open('https://www.qe.com.qa', '_blank'); }}
+                style={{
+                  fontSize: 9, padding: '3px 7px', borderRadius: 4,
+                  background: 'rgba(212,168,67,0.08)', color: 'var(--accent-gold)',
+                  border: '1px solid rgba(212,168,67,0.2)',
+                  cursor: 'pointer', fontWeight: 600,
+                }}
+              >QSE</span>
+              <span
+                onClick={function() { window.open('https://www.boursakuwait.com.kw', '_blank'); }}
+                style={{
+                  fontSize: 9, padding: '3px 7px', borderRadius: 4,
+                  background: 'rgba(212,168,67,0.08)', color: 'var(--accent-gold)',
+                  border: '1px solid rgba(212,168,67,0.2)',
+                  cursor: 'pointer', fontWeight: 600,
+                }}
+              >Boursa KW</span>
             </div>
           </div>
 
@@ -350,10 +380,7 @@ export default function Gulf() {
             border: '1px solid rgba(34,197,94,0.15)',
             borderRadius: 10, padding: '10px 14px', textAlign: 'center',
           }}>
-            <div style={{
-              fontFamily: 'var(--font-arabic)',
-              fontSize: 14, color: 'rgba(212,168,67,0.6)', marginBottom: 4,
-            }}>
+            <div style={{ fontSize: 13, color: 'rgba(212,168,67,0.6)', marginBottom: 4 }}>
               الرزق من عند الله
             </div>
             <p style={{ fontSize: 9, color: 'var(--text-muted)' }}>
@@ -365,6 +392,3 @@ export default function Gulf() {
     </div>
   );
 }
-
-
-
